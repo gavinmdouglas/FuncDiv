@@ -1,0 +1,28 @@
+Package: FuncDiv
+Title: Compute contributional diversity metrics
+Version: 0.1
+Authors@R: 
+    person("Gavin", "Douglas", , "gavinmdouglas@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-5164-6707"))
+Description: Compute alpha and beta contributional diversity metrics, which is mainly intended for linking taxonomic and functional microbiome data.
+License: GPL (>= 3)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Depends:
+    Rcpp,
+    RcppArmadillo
+LinkingTo:
+    Rcpp,
+    RcppArmadillo
+Imports:
+    ape,
+    Rcpp,
+    collapse,
+    data.table,
+    parallel,
+    parallelDist,
+    reshape2
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3

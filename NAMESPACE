@@ -1,0 +1,11 @@
+useDynLib(FuncDiv)
+exportPattern("ˆ[[:alpha:]]+")
+importFrom(Rcpp, evalCpp)
+
+export(abun_alpha_div)
+export(alpha_div_contrib)
+export(beta_div_contrib)
+export(calc_func_abun)
+export(clr_transform_by_col)
+export(faiths_pd)
+export(run_div_metric_strat_long)
