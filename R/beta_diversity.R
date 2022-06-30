@@ -7,8 +7,38 @@ beta_div_contrib <- function(func_tab,
                              return_objects = FALSE,
                              write_outfiles = FALSE,
                              outdir = NULL,
-                             ncores = 1,
-                             parDist_func = NULL) {
+                             ncores = 1) {
+  
+  if (class(metrics) != "character") {
+    stop("Stopping - \"metrics\" input argument must be a character vector.")
+  }
+  
+  if (class(func_tab) != "data.frame") {
+    stop("Stopping - \"func_tab\" input argument must be a data.frame")
+  }
+  
+  if (class(abun_tab) != "data.frame") {
+    stop("Stopping - \"abun_tab\" input argument must be a data.frame")
+  }
+  
+  if (class(return_objects) != "logical" || length(return_objects) != 1) {
+    stop("Stopping - \"return_objects\" input argument must be a logical vector of length one.")
+  }
+  
+  if (class(write_outfiles) != "logical" || length(write_outfiles) != 1) {
+    stop("Stopping - \"write_outfiles\" input argument must be a logical vector of length one.")
+  }
+  
+  if (class(return_objects) != "logical" || length(return_objects) != 1) {
+    stop("Stopping - \"return_objects\" input argument must be a logical vector of length one.")
+  }
+  
+  if ((class(ncores) != "numeric" && class(ncores) != "integer") && length(ncores) != 1) {
+    stop("Stopping - \"ncores\" input argument must be an integer vector of length one.")
+  } else {
+   ncores <- as.integer(ncores) 
+  }
+
   
   if (sum(c(return_objects, write_outfiles) != 1)) {
     stop("Stopping - one (but not both) of the return_objects or write_outfiles arguments must be set to TRUE.") 
@@ -16,25 +46,33 @@ beta_div_contrib <- function(func_tab,
 
   if (write_outfiles) {
     if (is.null(outdir)) {
-      stop("Stopping - outdir needs to be specified when write_outfiles option specified.")
+      stop("Stopping - \"outdir\" argument needs to be specified when \"write_outfiles\" option specified.")
+    } else if (class(outdir) != "character" || length(outdir) != 1) {
+      stop("Stopping - \"outdir\" argument must be a character vector of length one (if specified).")
     } else if (dir.exists(outdir)) {
-      stop("Stopping - outdir already exists and will not be overwritten. Please either delete this folder or specify a different folder name to be created.")
+      stop("Stopping - specified output directory already exists and will not be overwritten. Please either delete this folder or specify a different folder name to be created.")
     } else if (file.exists(outdir)) {
       stop("Stopping - there is a file with the name of the output directory that you have specified. Please use a different output folder name to be created.")
     } else {
       dir.create(outdir)
     }
   } else if (! is.null(outdir)) {
-    stop("Stopping - outdir argument cannot be set unless write_outfiles = TRUE.") 
+    stop("Stopping - \"outdir\" argument cannot be set unless \"write_outfiles = TRUE\".") 
   }
 
-  if (is.null(func_ids)) {
-    message("The func_ids argument was not set, so beta diversity will be computed based on the taxonomic contributors for *every* function (i.e., row) of the input function table.")
+  if (is.null(func_ids) && nrow(func_tab) > 100) {
+    
+    message("The \"func_ids\" argument was not set, so beta diversity will be computed based on the taxonomic contributors for *every* function (i.e., row) of the input function table.")
     message("Note that if there are many functions that this can result in long running times and either extremely large objects returned or many files written.")
+  
   } else {
     
+    if (class(func_ids) != "character") {
+      stop("Stopping - \"func_ids\" input argument must either be NULL or a character vector.")
+    }
+    
     if (length(which(! func_ids %in% rownames(func_tab))) > 0) {
-      stop("Stopping - the following function ids specified in func_ids are not present as rows in the function table:\n",
+      stop("Stopping - the following function ids specified in \"func_ids\" are not present as rows in the function table:\n.  ",
            paste(func_ids[which(! func_ids %in% rownames(func_tab))], collapse = " "))
     }
     
@@ -49,49 +87,19 @@ beta_div_contrib <- function(func_tab,
                        "whittaker", "binary", "braun-blanquet", "dice", "fager", 
                        "faith", "hamman", "kulczynski1", "kulczynski2", "michael", 
                        "mountford", "mozley", "ochiai", "phi", "russel", "simple matching", 
-                       "simpson", "stiles", "tanimoto", "yule", "yule2", "cosine", 
-                       "hamming", "custom")
+                       "simpson", "stiles", "tanimoto", "yule", "yule2", "cosine", "hamming")
   
   if (length(which(! metrics %in% parDist_methods)) > 0) {
-    stop("Stopping - at least one specified distance/divergence metric is not available through parDist.") 
-  }
-    
-  if ("custom" %in% metrics && is.null(parDist_func)) {
-    stop("Stopping - the parDist_func option must be specified to use a custom metric.") 
+    stop("Stopping - the following specified distance/divergence metrics are not available through parallelDist::parDist:\n   ",
+         paste(metrics[which(! metrics %in% parDist_methods)], collapse = " "))
   }
   
-  intersecting_features <- colnames(func_tab)[which(colnames(func_tab) %in% rownames(abun_tab))]
-  
-  if (length(intersecting_features) == 0) {
-    stop("Stopping - no features intersect between the two input tables (i.e., between the column names of the function table and row names of the abundance table).")
-  }
-  
-  func_tab <- func_tab[, intersecting_features, drop = FALSE]
-  abun_tab <- abun_tab[intersecting_features, , drop = FALSE]
-  
-  abun_tab <- abun_tab[which(rowSums(abun_tab) > 0), , drop = FALSE]
-  
-  func_tab <- func_tab[, rownames(abun_tab), drop = FALSE]
-  func_tab <- func_tab[which(rowSums(func_tab) > 0), , drop = FALSE]
-  func_tab <- func_tab[, which(colSums(func_tab) > 0), drop = FALSE]
-  
-  if (ncol(func_tab) == 0) {
-   stop("Stopping - no features remaining after restricting to taxa in the taxa abundance table, and filtering out those that are all 0's.") 
-  }
-  
-  if (is.null(func_ids) && nrow(func_tab) == 0) {
-    stop("Stopping - no functions remaining after restricting to taxa in the taxa abundance table, and filtering out those that are all 0's.") 
-  } else if(! is.null(func_ids) && nrow(func_tab) < length(func_ids)) {
-    stop("Stopping - the above function ids specified in func_ids are not present as rows in the function table after restricting to taxa in the taxa abundance table, and filtering out rows that are all 0's:\n",
-         paste(func_ids[which(! func_ids %in% rownames(func_tab))], collapse = " "))
-  }
-  
-  abun_tab <- abun_tab[colnames(func_tab), , drop = FALSE]
-  abun_tab <- abun_tab[, which(colSums(abun_tab) > 0), drop = FALSE]
-  
-  if (ncol(abun_tab) == 0) {
-    stop("Stopping - no samples remaining after filtering out those that are all 0's.") 
-  }
+  subsetted_tables <- subset_func_and_abun_tables(func_table = func_tab,
+                                                  abun_table = abun_tab,
+                                                  func_ids = func_ids)
+  func_tab <- subsetted_tables$func
+  abun_tab <- subsetted_tables$abun
+  rm(subsetted_tables)
   
   prepped_contrib <- prep_func_contributor_dimnames(abun_tab = as.matrix(abun_tab),
                                                     func_tab = as.matrix(func_tab))
@@ -121,8 +129,7 @@ beta_div_contrib <- function(func_tab,
                                      function(func_i) {
             
                                          func_dist <- as.matrix(parallelDist::parDist(func_contrib_subsets[[func_i]],
-                                                                                      method = metric,
-                                                                                      func = parDist_func))
+                                                                                      method = metric))
                                          
                                          diag(func_dist) <- NA
                                          
@@ -153,8 +160,7 @@ beta_div_contrib <- function(func_tab,
                                                     outfile <- paste(outdir, "/", metric, "/", func_id, ".tsv", sep = "")
                                                     
                                                     func_dist <- as.matrix(parallelDist::parDist(func_contrib_subsets[[func_i]],
-                                                                                                 method = metric,
-                                                                                                 func = parDist_func))
+                                                                                                 method = metric))
                                                     diag(func_dist) <- NA
                                                     
                                                     func_dist[lower.tri(func_dist)] <- NA

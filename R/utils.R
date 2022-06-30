@@ -24,8 +24,45 @@ calc_func_abun <- function(in_abun, in_func, ncores=1) {
 }
 
 
-#' @export
-clr_transform_by_col <- function(in_df) {
-  # Perform CLR transformation on table assuming samples are columns.
-  return(data.frame(apply(in_df, 2, function(x){log(x) - mean(log(x))}), check.names=FALSE))
+# Get intersecting taxa in function and abundance table.
+# Remove rows and columns that are all 0's in both tables.
+# Do some basic sanity checks at key steps during this process.
+# Can specify a subset of func ids that are expected to be present after filtering, otherwise will only throw error if no functions remain.
+subset_func_and_abun_tables <- function(func_table, abun_table, func_ids = NULL) {
+
+  intersecting_features <- colnames(func_table)[which(colnames(func_table) %in% rownames(abun_table))]
+  
+  if (length(intersecting_features) == 0) {
+    stop("Stopping - no features intersect between the two input tables (i.e., between the column names of the function table and row names of the abundance table).")
+  }
+
+  func_table <- func_table[, intersecting_features, drop = FALSE]
+  abun_table <- abun_table[intersecting_features, , drop = FALSE]
+  
+  abun_table <- abun_table[which(rowSums(abun_table) > 0), , drop = FALSE]
+  
+  func_table <- func_table[, rownames(abun_table), drop = FALSE]
+  func_table <- func_table[which(rowSums(func_table) > 0), , drop = FALSE]
+  func_table <- func_table[, which(colSums(func_table) > 0), drop = FALSE]
+  
+  if (ncol(func_table) == 0) {
+    stop("Stopping - no features remaining after restricting to taxa in the taxa abundance table, and filtering out those that are all 0's.") 
+  }
+  
+  if (is.null(func_ids) && nrow(func_table) == 0) {
+    stop("Stopping - no functions remaining after restricting to taxa in the taxa abundance table, and filtering out those that are all 0's.") 
+  } else if(! is.null(func_ids) && nrow(func_table) < length(func_ids)) {
+    stop("Stopping - the above function ids specified in func_ids are not present as rows in the function table after restricting to taxa in the taxa abundance table, and filtering out rows that are all 0's:\n",
+         paste(func_ids[which(! func_ids %in% rownames(func_table))], collapse = " "))
+  }
+  
+  abun_table <- abun_table[colnames(func_table), , drop = FALSE]
+  abun_table <- abun_table[, which(colSums(abun_table) > 0), drop = FALSE]
+  
+  if (ncol(abun_table) == 0) {
+    stop("Stopping - no samples remaining after filtering out those that are all 0's.") 
+  }
+  
+  return(list(func = func_table, abun = abun_table))
+  
 }
