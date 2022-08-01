@@ -1,7 +1,8 @@
 
 #' @export
-beta_div_contrib <- function(func_tab,
-                             abun_tab,
+beta_div_contrib <- function(func_tab = NULL,
+                             abun_tab = NULL,
+                             contrib_tab = NULL,
                              metrics = c("binary", "kullback"),
                              func_ids = NULL,
                              return_objects = FALSE,
@@ -13,12 +14,46 @@ beta_div_contrib <- function(func_tab,
     stop("Stopping - \"metrics\" input argument must be a character vector.")
   }
   
-  if (class(func_tab) != "data.frame") {
-    stop("Stopping - \"func_tab\" input argument must be a data.frame")
+  if (is.null(func_tab) && is.null(abun_tab) && is.null(contrib_tab)) {
+    stop("Stopping - either \"func_tab\" and \"abun_tab\" *or* \"contrib_tab\" must be specified.")
   }
   
-  if (class(abun_tab) != "data.frame") {
-    stop("Stopping - \"abun_tab\" input argument must be a data.frame")
+  if (! is.null(func_tab) && ! is.null(abun_tab) && ! is.null(contrib_tab)) {
+    stop("Stopping - either \"func_tab\" and \"abun_tab\" *or* \"contrib_tab\" must be specified, not all!")
+  }
+  
+  if ((is.null(func_tab) && ! is.null(abun_tab)) || (! is.null(func_tab) && is.null(abun_tab))) {
+    stop("Stopping - either both \"func_tab\" and \"abun_tab\" or neither must be specified")
+  }
+  
+  if ((is.null(func_tab) && ! is.null(abun_tab)) || (! is.null(func_tab) && is.null(abun_tab))) {
+    stop("Stopping - either both \"func_tab\" and \"abun_tab\" or neither must be specified")
+  }
+  
+  if (! is.null(func_tab) && ! is.null(abun_tab)) {
+    
+    workflow_type <- "multi_tab"
+    
+    if (class(func_tab) != "data.frame") {
+      stop("Stopping - \"func_tab\" input argument must be a data.frame.")
+    }
+    
+    if (class(abun_tab) != "data.frame") {
+      stop("Stopping - \"abun_tab\" input argument must be a data.frame.")
+    }
+    
+  } else if (! is.null(contrib_tab)) {
+    
+    workflow_type <- "contrib_tab"
+    
+    if (class(contrib_tab) != "data.frame") {
+      stop("Stopping - \"contrib_tab\" input argument must be a data.frame.")
+    }
+    
+    if (length(which(c(samp_colname, func_colname, taxon_colname, abun_colname) %in% colnames(contrib_tab))) < 4) {
+      stop("Stopping - at least one of the specified \"samp_colname\", \"func_colname\", \"taxon_colname\", or \"abun_colname\" options is not present as a column name in \"contrib_tab\".")
+    }
+    
   }
   
   if (class(return_objects) != "logical" || length(return_objects) != 1) {
@@ -94,29 +129,60 @@ beta_div_contrib <- function(func_tab,
          paste(metrics[which(! metrics %in% parDist_methods)], collapse = " "))
   }
   
-  subsetted_tables <- subset_func_and_abun_tables(func_table = func_tab,
-                                                  abun_table = abun_tab,
-                                                  func_ids = func_ids)
-  func_tab <- subsetted_tables$func
-  abun_tab <- subsetted_tables$abun
-  rm(subsetted_tables)
-  
-  prepped_contrib <- prep_func_contributor_dimnames(abun_tab = as.matrix(abun_tab),
-                                                    func_tab = as.matrix(func_tab))
-  
-  func_contrib_subsets <- parallel::mclapply(1:length(prepped_contrib),
-                                       function(func_i) {
-                                         func_contrib_abun <- as.matrix(collapse::ss(x = abun_tab,
-                                                                                     i = prepped_contrib[[func_i]][[1]] + 1,
-                                                                                     j = prepped_contrib[[func_i]][[2]] + 1))
-                                         
-                                         t(sweep(x = func_contrib_abun,
-                                                 MARGIN = 2,
-                                                 STATS = colSums(func_contrib_abun),
-                                                 FUN = '/'))
-                                         
-                                       },
-                                       mc.cores = ncores)
+  if (workflow_type == "multi_tab") {
+    subsetted_tables <- subset_func_and_abun_tables(func_table = func_tab,
+                                                    abun_table = abun_tab,
+                                                    func_ids = func_ids)
+    func_tab <- subsetted_tables$func
+    abun_tab <- subsetted_tables$abun
+    rm(subsetted_tables)
+    
+    prepped_contrib <- prep_func_contributor_dimnames(abun_tab = as.matrix(abun_tab),
+                                                      func_tab = as.matrix(func_tab))
+    
+    func_contrib_subsets <- parallel::mclapply(1:length(prepped_contrib),
+                                         function(func_i) {
+                                           func_contrib_abun <- as.matrix(collapse::ss(x = abun_tab,
+                                                                                       i = prepped_contrib[[func_i]][[1]] + 1,
+                                                                                       j = prepped_contrib[[func_i]][[2]] + 1))
+                                           
+                                           t(sweep(x = func_contrib_abun,
+                                                   MARGIN = 2,
+                                                   STATS = colSums(func_contrib_abun),
+                                                   FUN = '/'))
+                                           
+                                         },
+                                         mc.cores = ncores)
+    
+    func_ordered <- rownames(func_tab)
+
+  } else if (workflow_type == "contrib_tab") {
+    
+    contrib_tab <- contrib_tab[, c(samp_colname, func_colname, taxon_colname, abun_colname)]
+    
+    contrib_tab_split <- collapse::rsplit(x = contrib_tab, by = contrib_tab[, func_colname])
+    
+    func_contrib_subsets <- mclapply(contrib_tab_split,
+                                        function(x) {
+                                          tab <- data.table::dcast.data.table(data = data.table(x),
+                                                                      formula = x[, taxon_colname] ~ x[, samp_colname],
+                                                                      value.var = abun_colname)
+                                          
+                                          tab[is.na(tab)] <- 0
+                                          
+                                          rownames(tab) <- tab$contrib_tab_split
+                                          
+                                          tab <- tab[, -1]
+                                          
+                                          tab <- sweep(x = tab, MARGIN = 2, STATS = colSums(tab), '/') * 100
+                                          
+                                          return(tab)
+                                        },
+                                        mc.cores = ncores)
+
+    func_ordered <- names(contrib_tab_split)
+    
+  }
   
   if (return_objects) {
 
@@ -139,7 +205,7 @@ beta_div_contrib <- function(func_tab,
                                        
                                        }, mc.cores = ncores)
 
-      names(all_dists[[metric]]) <- rownames(func_tab)
+      names(all_dists[[metric]]) <- func_ordered
       
     }
     
