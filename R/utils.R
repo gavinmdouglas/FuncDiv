@@ -1,3 +1,13 @@
+#' Utility function to convert from contributional to multi-table input objects
+#' 
+#' Converts from contributional-type table (i.e., a single, long table with joint taxa/function information) to separate taxa abundance and function copy number tables.
+#' 
+#' @param contrib_tab data.frame object containing combined taxa abundances and function copy numbers across taxa. Must contain columns corresponding to the sample ids, function ids, taxa ids, and taxa 
+#' abundances within samples. These column names are specified by the `samp_colname`, `func_colname`, `taxon_colname`, and `abun_colname`, respectively. 
+#' @param samp_colname sample id column name of `contrib_tab` input data.frame.
+#' @param func_colname function id column name of `contrib_tab` input data.frame.
+#' @param taxon_colname taxon id column name of `contrib_tab` input data.frame.
+#' @param abun_colname taxonomic abundance (within each sample) column name of `contrib_tab` input data.frame.
 #' @export
 contrib_to_multitab <- function(contrib_tab,
                                 samp_colname = "sample",
@@ -28,7 +38,7 @@ contrib_to_multitab <- function(contrib_tab,
     stopping("Stopping - at least one combination of samples and taxa has a different specificied abundance across different functions. This could indicate an issue with the contributional format in the first place, and means that it is impossible to convert to the two table format.")
   }
   
-  contrib_taxa_abun_wide <- data.frame(data.table::dcast.data.table(data = data.table(contrib_taxa_abun),
+  contrib_taxa_abun_wide <- data.frame(data.table::dcast.data.table(data = data.table::data.table(contrib_taxa_abun),
                                                                     formula = as.formula(paste(taxon_colname, "~", samp_colname, sep = " ")),
                                                                     value.var = abun_colname), check.names = FALSE)
   
@@ -48,7 +58,7 @@ contrib_to_multitab <- function(contrib_tab,
     stopping("Stopping - at least one combination of taxa / functions has a different specificied copy number across samples. This can happen for instance if pathways levels per taxon are computed based on how much they contribute to the community-wide pathway abundance. This means that it is impossible to convert to the two table format.")
   }
   
-  contrib_tab_func_copy_num_wide <- data.frame(data.table::dcast.data.table(data = data.table(contrib_tab_func_copy_num),
+  contrib_tab_func_copy_num_wide <- data.frame(data.table::dcast.data.table(data = data.table::data.table(contrib_tab_func_copy_num),
                                                                             formula = as.formula(paste(func_colname, "~", taxon_colname, sep = " ")),
                                                                             value.var = copy.num_colname), check.names = FALSE)
   
@@ -62,7 +72,18 @@ contrib_to_multitab <- function(contrib_tab,
 }
 
 
-# Convert from multi-table format to contributional format.
+#' Utility function to convert from multi-table objects to contributional table
+#' 
+#' Converts from separate taxa abundance and function copy number table input style to contributional-type table (i.e., a single, long table with joint taxa/function information). 
+#' @param func_tab data.frame object containing function copy numbers, with rows as functions and columns as taxa.
+#' @param abun_tab data.frame object containing taxonomic abundances across samples, with rows as taxa and columns as samples.
+#' @param ncores integer specifying number of cores to use for parallizable steps.
+#' @param samp_colname sample id column name of `contrib_tab` output data.frame.
+#' @param func_colname function id column name of `contrib_tab` output data.frame.
+#' @param taxon_colname taxon id column name of `contrib_tab` output data.frame.
+#' @param abun_colname taxonomic abundance (within each sample) column name of `contrib_tab` output data.frame.
+#' @param copy.num_colname function copy number (within each taxa) column name of `contrib_tab` output data.frame.
+#' 
 #' @export
 multitab_to_contrib <- function(func_tab,
                                 abun_tab,
@@ -123,25 +144,40 @@ multitab_to_contrib <- function(func_tab,
 
 }
 
+
+#' Utility function to get community-wide function abundance table
+#' 
+#' Takes in table of function copy numbers across taxa and table of taxa abundances across samples.
+#' Returns a new table representing the *unnormalized* community-wide abundances of functions across samples.
+#' I.e., it represents the multiplication of the function copy numbers by the abundances of the taxa within each sample.
+#'
+#' @param func_tab data.frame object containing function copy numbers, with rows as functions and columns as taxa.
+#' @param abun_tab data.frame object containing taxonomic abundances across samples, with rows as taxa and columns as samples.
+#' 
 #' @export
-func_abun_crossproduct <- function(in_abun, in_func) {
+func_abun_crossproduct <- function(func_tab, abun_tab) {
   
-  # Check that all rows are found in function table.
-  if(length(which(! rownames(in_abun) %in% rownames(in_func))) > 0) {
+  # Check that all column names in function table.
+  if(length(which(! rownames(abun_tab) %in% colnames(func_tab))) > 0) {
     stop("Stoppings - some rows in abundance table not found in function table.")
   }
   
-  in_func <- in_func[rownames(in_abun), ]
+  func_tab <- func_tab[, rownames(abun_tab)]
   
-  return(data.frame(t(crossprod(as.matrix(in_abun), as.matrix(in_func))), check.names = FALSE))
+  return(data.frame(t(crossprod(as.matrix(abun_tab), t(func_tab))), check.names = FALSE))
   
 }
 
 
-# Get intersecting taxa in function and abundance table.
-# Remove rows and columns that are all 0's in both tables.
-# Do some basic sanity checks at key steps during this process.
-# Can specify a subset of func ids that are expected to be present after filtering, otherwise will only throw error if no functions remain.
+#' Utility function to subset function copy number and taxonomic abundance tables
+#' 
+#' The input tables will be returned except subset to the same taxa ids. Any functions and / or samples that are totally absent after this step will be dropped.
+#' 
+#' @param func_tab data.frame object containing function copy numbers, with rows as functions and columns as taxa.
+#' @param abun_tab data.frame object containing taxonomic abundances across samples, with rows as taxa and columns as samples.
+#' @param func_ids optional character vector of function ids to retain (all other rows of `func_tab` will be removed).
+#' 
+#' @export
 subset_func_and_abun_tables <- function(func_table, abun_table, func_ids = NULL) {
 
   intersecting_features <- colnames(func_table)[which(colnames(func_table) %in% rownames(abun_table))]
@@ -165,9 +201,11 @@ subset_func_and_abun_tables <- function(func_table, abun_table, func_ids = NULL)
   
   if (is.null(func_ids) && nrow(func_table) == 0) {
     stop("Stopping - no functions remaining after restricting to taxa in the taxa abundance table, and filtering out those that are all 0's.") 
-  } else if(! is.null(func_ids) && nrow(func_table) < length(func_ids)) {
+  } else if(! is.null(func_ids) && length(which(! func_ids %in% rownames(func_table))) > 0) {
     stop("Stopping - the above function ids specified in func_ids are not present as rows in the function table after restricting to taxa in the taxa abundance table, and filtering out rows that are all 0's:\n",
          paste(func_ids[which(! func_ids %in% rownames(func_table))], collapse = " "))
+  } else if(! is.null(func_ids)) {
+    func_table <- func_table[func_ids, , drop = FALSE]
   }
   
   abun_table <- abun_table[colnames(func_table), , drop = FALSE]

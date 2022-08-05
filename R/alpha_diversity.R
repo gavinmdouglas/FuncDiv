@@ -1,4 +1,3 @@
-#' @export
 faiths_pd <- function(tips_in_sample, tree) {
   
   # Simplified version of equivalent functions from picante.
@@ -126,90 +125,77 @@ inverse_simpson_index <- function(x) {
 }
 
 
-# A list containing different functions.
-# This is done for conveniently calling them programatically.
-# Also makes it easy to add in new functions.
+#' List object containing the functions to compute the default alpha diversity metrics
+#' 
+#' These functions are used by the `alpha_div_contrib` function to compute contributional diversity,
+#' but can be used for any arbitrary input vector as well to compute standard alpha diversity.
+#' 
+#' The metrics were primarily taken from definitions provided by `scikit-bio` Python package, as well as the `vegan` and `picante` R packages.
+#' The functions are provided as elements of this list, so that it is more convenient to call them programatically.
+#' All available alpha diversity metrics can be seen by typing `names(FuncDiv_alpha_metrics)`.
+#' The code to compute each metric can be inspected for each function, for instance, for richness, by typing: `FuncDiv_alpha_metrics$richness`.
+#'
+#' These functions all have a single input: a numeric vector containing taxa abundances within a given sample.
+#' The exception is for `faiths_pd`, which expects a character vector of taxa labels that are present, as well as a tree (phylo object),
+#' which must contain all these specified taxa labels as tip labels.
+#'
+#' Note that not all these metrics are appropriate for relative abundance data. In particular, these metrics expect count data (e.g., read counts) 
+#' corresponding to the number of occurrences of each category (e.g., each microbe): `menhinicks_richness`, `mcintoshs_evenness`, `mcintoshs_dominance`,
+#' `margalefs_richness`, and `fishers_alpha`.
+#' 
+#' @examples
+#' # Most metrics just require an input vector of abundances.
+#' test_abun <- c(0, NA, 1, 2, 10, 4)
+#' FuncDiv_alpha_metrics[["richness"]](test_abun)
+#'
+#' # Note that the input for computing Faith's PD is different.
+#' # Get a randomly generated tree:
+#' test_tree <- ape::rtree(n = 50)
+#' test_present_tips <- c('t1', 't2', 't3')
+#' FuncDiv_alpha_metrics[["faiths_pd"]](test_present_tips, test_tree)
+#'
 #' @export
-FuncDiv_abun_alpha_metrics <- list()
-FuncDiv_abun_alpha_metrics[["richness"]] <- richness
-FuncDiv_abun_alpha_metrics[["shannon_index"]] <- shannon_index
-FuncDiv_abun_alpha_metrics[["berger_parker_dominance"]] <- berger_parker_dominance
-FuncDiv_abun_alpha_metrics[["ENS_pie"]] <- ENS_pie
-FuncDiv_abun_alpha_metrics[["faiths_pd"]] <- faiths_pd
-FuncDiv_abun_alpha_metrics[["fishers_alpha"]] <- fishers_alpha
-FuncDiv_abun_alpha_metrics[["heips_evenness"]] <- heips_evenness
-FuncDiv_abun_alpha_metrics[["margalefs_richness"]] <- margalefs_richness
-FuncDiv_abun_alpha_metrics[["mcintoshs_dominance"]] <- mcintoshs_dominance
-FuncDiv_abun_alpha_metrics[["mcintoshs_evenness"]] <- mcintoshs_evenness
-FuncDiv_abun_alpha_metrics[["menhinicks_richness"]] <- menhinicks_richness
-FuncDiv_abun_alpha_metrics[["pielous_evenness"]] <- pielous_evenness
-FuncDiv_abun_alpha_metrics[["gini_simpson_index"]] <- gini_simpson_index
-FuncDiv_abun_alpha_metrics[["simpsons_evenness"]] <- simpsons_evenness
-FuncDiv_abun_alpha_metrics[["inverse_simpson_index"]] <- inverse_simpson_index
+FuncDiv_alpha_metrics <- list()
+FuncDiv_alpha_metrics[["richness"]] <- richness
+FuncDiv_alpha_metrics[["shannon_index"]] <- shannon_index
+FuncDiv_alpha_metrics[["berger_parker_dominance"]] <- berger_parker_dominance
+FuncDiv_alpha_metrics[["ENS_pie"]] <- ENS_pie
+FuncDiv_alpha_metrics[["faiths_pd"]] <- faiths_pd
+FuncDiv_alpha_metrics[["fishers_alpha"]] <- fishers_alpha
+FuncDiv_alpha_metrics[["heips_evenness"]] <- heips_evenness
+FuncDiv_alpha_metrics[["margalefs_richness"]] <- margalefs_richness
+FuncDiv_alpha_metrics[["mcintoshs_dominance"]] <- mcintoshs_dominance
+FuncDiv_alpha_metrics[["mcintoshs_evenness"]] <- mcintoshs_evenness
+FuncDiv_alpha_metrics[["menhinicks_richness"]] <- menhinicks_richness
+FuncDiv_alpha_metrics[["pielous_evenness"]] <- pielous_evenness
+FuncDiv_alpha_metrics[["gini_simpson_index"]] <- gini_simpson_index
+FuncDiv_alpha_metrics[["simpsons_evenness"]] <- simpsons_evenness
+FuncDiv_alpha_metrics[["inverse_simpson_index"]] <- inverse_simpson_index
 
+#' Convenience function for running default alpha diversity metrics on a single vector input
+#' 
+#' This is a simple wrapper for `FuncDiv_alpha_metrics`, and you can see more details with `?FuncDiv_alpha_metrics`.
+#' 
+#' These functions all have a single input: a numeric vector containing taxa abundances within a given sample.
+#' The exception is for `faiths_pd`, which expects a character vector of taxa labels that are present, as well as a tree (phylo object),
+#' which must contain all these specified taxa labels as tip labels.
+#' 
+#' @param x input vector. Either class numeric (representing abundance of categories [e.g., microbes]) or character (indicating which taxa are present, which is required for `faiths_pd`). 
+#' @param metric alpha diversity metric to compute. Must be one of `names(FuncDiv_alpha_metrics)`.
+#' @param tree phylo object to use in case of `faiths_pd`. 
+#' 
+#' @examples
+#' # Most metrics just require an input vector of abundances.
+#' test_abun <- c(0, NA, 1, 2, 10, 4)
+#' compute_alpha_div(x = test_abun, metric = "richness")
+#'
+#' # Note that the input for computing Faith's PD is different.
+#' # Get a randomly generated tree:
+#' test_tree <- ape::rtree(n = 50)
+#' test_present_tips <- c('t1', 't2', 't3')
+#' compute_alpha_div(x = test_present_tips, metric = "faiths_pd", tree = test_tree)
+#' 
 #' @export
-abun_alpha_div <- function(x, metric, ...) {
-  FuncDiv_abun_alpha_metrics[[metric]](x, ...)
-}
-
-
-#' @export
-alpha_div_contrib <- function(metrics, func_tab, abun_tab) {
-  
-  abun_tab <- abun_tab[which(rowSums(abun_tab) > 0), ]
-  abun_tab <- abun_tab[, which(colSums(abun_tab) > 0)]
-  
-  func_tab <- func_tab[, rownames(abun_tab), drop = FALSE]
-  func_tab <- func_tab[which(rowSums(func_tab) > 0), ]
-  func_tab <- func_tab[, which(colSums(func_tab) > 0)]
-  
-  abun_tab <- abun_tab[colnames(func_tab), ]
-  
-  func_set <- as.character()
-  sample_set <- as.character()
-  for (i in 1:nrow(func_tab)) {
-    func_set <- c(func_set, rep(rownames(func_tab)[i], ncol(abun_tab)))
-    sample_set <- c(sample_set, colnames(abun_tab))
-  }
-  
-  div_metric_out <- list()
-  
-  prepped_abun <- prep_all_sample_func_vec(abun_tab = as.matrix(abun_tab),
-                                           func_tab = as.matrix(func_tab))
-  
-  # Get list of taxa ids that are present in each sample / func combination if faiths_pd specified as well.
-  if ("faiths_pd" %in% metrics) {
-    prepped_taxa_present <- prep_all_sample_func_taxa_vec(abun_tab = as.matrix(abun_tab),
-                                                          func_tab = as.matrix(func_tab))
-    
-    div_metric_out[[m]] <- data.frame(matrix(NA, nrow = length(prepped_abun), ncol = 3))
-    colnames(div_metric_out[[m]]) <- c("sample", "func", "value")
-    div_metric_out[[m]]$sample <- sample_set
-    div_metric_out[[m]]$func <- func_set
-    
-    div_metric_out[[m]]$value <- sapply(prepped_taxa_present, calc_diversity[[m]], tree = in_tree) 
-    
-    div_metric_out[[m]] <- reshape2::dcast(data = div_metric_out[[m]],
-                                           formula = func ~ sample)
-    rownames(div_metric_out[[m]]) <- div_metric_out[[m]]$func
-    div_metric_out[[m]] <- div_metric_out[[m]][, -1]
-    
-    metrics <- metrics[-which(metrics == "faiths_pd")]
-  }
-  
-  for (m in metrics) {
-    div_metric_out[[m]] <- data.frame(matrix(NA, nrow = length(prepped_abun), ncol = 3))
-    colnames(div_metric_out[[m]]) <- c("sample", "func", "value")
-    div_metric_out[[m]]$sample <- sample_set
-    div_metric_out[[m]]$func <- func_set
-    
-    div_metric_out[[m]]$value <- sapply(prepped_abun, calc_diversity[[m]])
-    
-    div_metric_out[[m]] <- reshape2::dcast(data = div_metric_out[[m]],
-                                           formula = func ~ sample)
-    rownames(div_metric_out[[m]]) <- div_metric_out[[m]]$func
-    div_metric_out[[m]] <- div_metric_out[[m]][, -1]
-  }
-  
-  return(div_metric_out)
+compute_alpha_div <- function(x, metric, ...) {
+  FuncDiv_alpha_metrics[[metric]](x, ...)
 }

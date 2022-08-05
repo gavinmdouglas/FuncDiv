@@ -1,4 +1,30 @@
-
+#' Main function for computing contributional **alpha** diversity
+#' 
+#' Based on joint taxa-function input data (i.e., contributional data), a dataframe
+#' will be returned for each specified metric, which will contain the metric values for all function and sample combinations.
+#' 
+#' Input data can be either a separate function copy number and taxonomic abundance table, or a joint contributional table.
+#' By default, specified metrics must be one of `names(FuncDiv_alpha_metrics)`. However, custom alpha diversity metric functions
+#' can be specified with the `custom_metric_functions` parameter.
+#' 
+#' Note that the taxonomic abundances can be relative abundance, read counts, or transformed in another way. However, note that some default metrics
+#' are only compatible with count data (see `?FuncDiv_alpha_metrics`).
+#' 
+#' @param metrics alpha diversity metrics to compute. Must either be names of functions in `FuncDiv_alpha_metrics`, or alternatively in `custom_metric_functions`, if specified. 
+#' @param func_tab data.frame object containing function copy numbers, with rows as functions and columns as taxa. Required if `abun_tab` is specified, and is mutually exclusive with `contrib_tab`.
+#' @param abun_tab data.frame object containing taxonomic abundances across samples, with rows as taxa and columns as samples. Required if `func_tab` is specified, and is mutually exclusive with `contrib_tab`.
+#' @param contrib_tab data.frame object containing combined taxa abundances and function copy numbers across taxa. Must contain columns corresponding to the sample ids, function ids, taxa ids, and taxa 
+#' abundances within samples. These column names are specified by the `samp_colname`, `func_colname`, `taxon_colname`, and `abun_colname`, respectively. Mutually exclusive with `abun_tab` and `func_tab`. 
+#' @param in_tree phylo object to use if `faiths_pd` is specified.
+#' @param ncores integer indicating number of cores to use for parallelizable steps.
+#' @param replace_NA Boolean vector of length one, indicating whether all NA's in the output of all metrics should be converted to 0's. Note that this done automatically done for `richness` either way.
+#' @param custom_metric_functions List object containing custom alpha diversity metric functions. This overrides `FuncDiv_alpha_metrics` when specified. The list element names must correspond to at
+#' least some of the names indicated by the `metrics` parameter.
+#' @param samp_colname sample id column name of `contrib_tab` input data.frame.
+#' @param func_colname function id column name of `contrib_tab` input data.frame.
+#' @param taxon_colname taxon id column name of `contrib_tab` input data.frame.
+#' @param abun_colname taxonomic abundance (within each sample) column name of `contrib_tab` input data.frame.
+#'
 #' @export
 alpha_div_contrib <- function(metrics,
                               func_tab = NULL,
@@ -10,8 +36,8 @@ alpha_div_contrib <- function(metrics,
                               custom_metric_functions = NULL,
                               samp_colname = "sample",
                               func_colname = "function.",
-                              abun_colname = "taxon_abun",
-                              taxon_colname = "taxon") {
+                              taxon_colname = "taxon",
+                              abun_colname = "taxon_abun") {
   
   if (class(metrics) != "character") {
     stop("Stopping - \"metrics\" input argument must be a character vector.")
@@ -65,12 +91,12 @@ alpha_div_contrib <- function(metrics,
 
   if (is.null(custom_metric_functions)) {
     
-    metric_functions <- FuncDiv_abun_alpha_metrics
+    metric_functions <- FuncDiv_alpha_metrics
     
-    if (length(which(! metrics %in% names(FuncDiv_abun_alpha_metrics))) > 0) {
-      stop("Stopping - the following specified metrics are not names in the \"FuncDiv_abun_alpha_metrics\" object:\n   ",
-           paste(metrics[which(! metrics %in% names(FuncDiv_abun_alpha_metrics))], collapse = " "), "\n\n",
-           "  You can see all available alpha diversity metrics by typing \"names(FuncDiv_abun_alpha_metrics)\".")
+    if (length(which(! metrics %in% names(FuncDiv_alpha_metrics))) > 0) {
+      stop("Stopping - the following specified metrics are not names in the \"FuncDiv_alpha_metrics\" object:\n   ",
+           paste(metrics[which(! metrics %in% names(FuncDiv_alpha_metrics))], collapse = " "), "\n\n",
+           "  You can see all available alpha diversity metrics by typing \"names(FuncDiv_alpha_metrics)\".")
     }
 
   } else {
@@ -236,7 +262,7 @@ alpha_div_contrib <- function(metrics,
         div_metric_out[[m]][is.na(div_metric_out[[m]])] <- 0
       }
     }
-    
+
   }
   
   return(div_metric_out)

@@ -206,6 +206,70 @@ test_that("beta_div_contrib check dist values for random sample / KO combo #2 ou
 })
 
 
+
+test_that("beta_div_contrib works correctly with func_ids input, repeating earlier test with slight change", {
+  
+  all_out <- beta_div_contrib(metrics = parDist_methods_test_set,
+                              func_tab = func_tab,
+                              abun_tab = abun_tab[ , c("ERR1190790", "ERR2013618")],
+                              func_ids = "K01956",
+                              ncores = 1, 
+                              return_objects = TRUE)
+  
+  observed_out <- c()
+  for (m in parDist_methods_test_set) {
+    observed_out <- c(observed_out, all_out[[m]]$K01956["ERR1190790", "ERR2013618"])
+  }
+  
+  expected_out <- c(1.39742611897941, 0.991934259881616, 13.7908235504253, 1.41295542219403,
+                    13.6254018879072, 0.997656868608457, 0.79162467299016, 0.99595080004354,
+                    1.56901783841108, 1.39742611897941, NaN, 1.98386851976323, 0.466577047332018,
+                    0.79162467299016, 1.91208791208791, 0.99595080004354, 13.8831953882195,
+                    0.991934259881616, 0.928571428571429, 0.875, 0.866666666666667, -0.189245034576083,
+                    0.928571428571429, 0.142857142857143, 0.923076923076923, 0.866071428571429,
+                    0.0117647058823529, 0.979381443298969, 0.75, 0.866369379043788, 0.133974596215561,
+                    0.928571428571429, 0.928571428571429, 0.857142857142857, -0.986732143575568,
+                    0.962962962962963, 0, 0, 0.998221512553748, 1)
+  
+  expect_equal(expected_out, observed_out)
+  
+})
+
+
+test_that("beta_div_contrib works correctly with func_ids input, repeating earlier test with contrib input as well", {
+  
+  contrib_tab_subset <- contrib_tab[which(contrib_tab$samp %in% c("ERR1190790", "ERR2013618")), ]
+  
+  all_out <- beta_div_contrib(metrics = parDist_methods_test_set,
+                              contrib_tab = contrib_tab_subset,
+                              func_ids = "K01956",
+                              ncores = 1, 
+                              return_objects = TRUE,
+                              samp_colname = "samp",
+                              func_colname = "func",
+                              taxon_colname = "tax",
+                              abun_colname = "tax_abun")
+  
+  observed_out <- c()
+  for (m in parDist_methods_test_set) {
+    observed_out <- c(observed_out, all_out[[m]]$K01956["ERR1190790", "ERR2013618"])
+  }
+  
+  expected_out <- c(1.39742611897941, 0.991934259881616, 13.7908235504253, 1.41295542219403,
+                    13.6254018879072, 0.997656868608457, 0.79162467299016, 0.99595080004354,
+                    1.56901783841108, 1.39742611897941, NaN, 1.98386851976323, 0.466577047332018,
+                    0.79162467299016, 1.91208791208791, 0.99595080004354, 13.8831953882195,
+                    0.991934259881616, 0.928571428571429, 0.875, 0.866666666666667, -0.189245034576083,
+                    0.928571428571429, 0.142857142857143, 0.923076923076923, 0.866071428571429,
+                    0.0117647058823529, 0.979381443298969, 0.75, 0.866369379043788, 0.133974596215561,
+                    0.928571428571429, 0.928571428571429, 0.857142857142857, -0.986732143575568,
+                    0.962962962962963, 0, 0, 0.998221512553748, 1)
+  
+  expect_equal(expected_out, observed_out)
+  
+})
+
+
 test_that("beta_div_contrib (multi-tab input) returns same values when numbers at start of function, sample, and taxa ids.", {
   
   orig_out <- beta_div_contrib(metrics = c("bray", "binary"),

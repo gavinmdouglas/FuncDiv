@@ -1,9 +1,34 @@
-
+#' Main function for computing contributional **beta** diversity
+#' 
+#' Based on joint taxa-function input data (i.e., contributional data), the beta diversity (i.e., inter-sample distance or divergence)
+#' will be computed for the subset of taxa encoding each individual function separately. A large List object containing all these tables 
+#' can be returned, or alternatively these tables will be written to the disk as plain-text files.
+#' 
+#' Input data can be either a separate function copy number and taxonomic abundance table, or a joint contributional table.
+#' Specified metrics must be available through the `parallelDist::parDist` function. See `?parallelDist::parDist` for a description of all available metrics.
+#' 
+#' The taxonomic abundances will be converted to relative abundances prior to computing inter-sample distances.
+#' 
+#' @param metrics beta diversity metrics to compute. Must be possible metrics computed by `parallelDist::parDist`.
+#' @param func_tab data.frame object containing function copy numbers, with rows as functions and columns as taxa. Required if `abun_tab` is specified, and is mutually exclusive with `contrib_tab`.
+#' @param abun_tab data.frame object containing taxonomic abundances across samples, with rows as taxa and columns as samples. Required if `func_tab` is specified, and is mutually exclusive with `contrib_tab`.
+#' @param contrib_tab data.frame object containing combined taxa abundances and function copy numbers across taxa. Must contain columns corresponding to the sample ids, function ids, taxa ids, and taxa 
+#' abundances within samples. These column names are specified by the `samp_colname`, `func_colname`, `taxon_colname`, and `abun_colname`, respectively.Mutually exclusive with `abun_tab` and `func_tab`. 
+#' @param func_ids character vector specifying subset of function ids to include for analysis. Will analyze all functions present if this is not specified.
+#' @param return_objects Boolean vector of length one, specifying whether function should return a list of all output distance tables (nested by metric name, and then by function id). Incompatible with `write_outfiles`.
+#' @param write_outfiles Boolean vector of length one, specifying whether function write all distance tables to plain-text files in the specified `outdir` location. Incompatible with `return_objects`.
+#' @param outdir character vector of length one, indicating where to save output files if `write_outfiles = TRUE`.
+#' @param ncores integer indicating number of cores to use for parallelizable steps.
+#' @param samp_colname sample id column name of `contrib_tab` input data.frame.
+#' @param func_colname function id column name of `contrib_tab` input data.frame.
+#' @param taxon_colname taxon id column name of `contrib_tab` input data.frame.
+#' @param abun_colname taxonomic abundance (within each sample) column name of `contrib_tab` input data.frame.
+#'
 #' @export
-beta_div_contrib <- function(func_tab = NULL,
+beta_div_contrib <- function(metrics = c("binary", "bray"),
+                             func_tab = NULL,
                              abun_tab = NULL,
                              contrib_tab = NULL,
-                             metrics = c("binary", "bray"),
                              func_ids = NULL,
                              return_objects = FALSE,
                              write_outfiles = FALSE,
@@ -11,8 +36,8 @@ beta_div_contrib <- function(func_tab = NULL,
                              ncores = 1,
                              samp_colname = "sample",
                              func_colname = "function.",
-                             abun_colname = "taxon_abun",
-                             taxon_colname = "taxon") {
+                             taxon_colname = "taxon",
+                             abun_colname = "taxon_abun") {
   
   if (class(metrics) != "character") {
     stop("Stopping - \"metrics\" input argument must be a character vector.")
@@ -114,12 +139,23 @@ beta_div_contrib <- function(func_tab = NULL,
       stop("Stopping - \"func_ids\" input argument must either be NULL or a character vector.")
     }
     
-    if (length(which(! func_ids %in% rownames(func_tab))) > 0) {
-      stop("Stopping - the following function ids specified in \"func_ids\" are not present as rows in the function table:\n.  ",
-           paste(func_ids[which(! func_ids %in% rownames(func_tab))], collapse = " "))
-    }
+    if (workflow_type == "multi_tab") {
+      if (length(which(! func_ids %in% rownames(func_tab))) > 0) {
+        stop("Stopping - the following function ids specified in \"func_ids\" are not present as rows in the function table:\n.  ",
+             paste(func_ids[which(! func_ids %in% rownames(func_tab))], collapse = " "))
+      }
     
-    func_tab <- func_tab[func_ids, ]
+      func_tab <- func_tab[func_ids, ]
+
+    } else if (workflow_type == "contrib_tab") {
+      if (length(which(! func_ids %in% contrib_tab[, func_colname])) > 0) {
+        stop("Stopping - the following function ids specified in \"func_ids\" are not present as contributional table function id column:\n.  ",
+             paste(func_ids[which(! func_ids %in% contrib_tab[, func_colname])], collapse = " "))
+      }
+      
+      contrib_tab <- contrib_tab[which(contrib_tab[, func_colname] %in% func_ids), ]
+      
+    }
   
   }
     
@@ -180,7 +216,7 @@ beta_div_contrib <- function(func_tab = NULL,
     
     func_contrib_subsets <- parallel::mclapply(contrib_tab_split,
                                         function(x) {
-                                          tab <- data.table::dcast.data.table(data = data.table(x),
+                                          tab <- data.table::dcast.data.table(data = data.table::data.table(x),
                                                                       formula = x[, taxon_colname] ~ x[, samp_colname],
                                                                       value.var = abun_colname)
                                           
