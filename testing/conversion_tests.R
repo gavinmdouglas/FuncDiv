@@ -47,7 +47,7 @@ all.equal(contrib_tab_remade, contrib_tab_orig)
 
 
 func_tab_orig <- read.table("/home/gdouglas/scripts/FuncDiv/example_files/func_input.tsv.gz",
-                            header = TRUE, sep = "\t", row.names = 1)
+                            header = TRUE, sep = "\t", row.names = 1, check.names = FALSE)
 
 taxa_tab_orig <- read.table("/home/gdouglas/scripts/FuncDiv/example_files/taxa_input.tsv.gz",
                             header = TRUE, sep = "\t", row.names = 1)
@@ -61,6 +61,18 @@ contrib_tab_out <- multitab_to_contrib(func_tab = func_tab_orig,
                                           taxon_colname = "taxon",
                                           copy.num_colname = "genome_function_count")
 
+
+contrib_tab_out[which(contrib_tab_out$samp == "ERR1190790" & 
+                        contrib_tab_out$func == "K01591"), "taxon"]
+
+rownames(taxa_tab_orig)[which(taxa_tab_orig$ERR1190790 > 0)]
+
+
+
+
+
+write.table(x = contrib_tab_out, file = "/home/gdouglas/scripts/FuncDiv/example_files/contrib_input.tsv",
+            sep = "\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
 
 subsetted_tables <- subset_func_and_abun_tables(func_table = func_tab_orig,
                                                 abun_table = taxa_tab_orig)

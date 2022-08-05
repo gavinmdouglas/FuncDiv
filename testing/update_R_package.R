@@ -21,8 +21,4 @@ devtools::document()
 
 devtools::load_all(path = "/home/gdouglas/scripts/FuncDiv/")
 devtools::test()
-
-
-
-devtools::build()
-
+#devtools::build()

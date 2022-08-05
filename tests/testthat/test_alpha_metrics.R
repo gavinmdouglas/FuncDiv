@@ -4,6 +4,8 @@
 # the Gini-Simpson index, which was checked against the diversity function in the diverse R package,
 # and the inverse Simpson index, which was checked against the diversity function in the vegan R package.
 
+library(FuncDiv)
+
 # Toy example input vectors.
 in_vec <- c(3, 3, 1, 1, 4, 5)
 in_vec_complex <- c(NA, 3, 0, 1, 4, 0)

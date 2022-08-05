@@ -120,7 +120,7 @@ alpha_div_contrib <- function(metrics,
     
     contrib_tab <- contrib_tab[collapse::radixorder(contrib_tab[, samp_colname], contrib_tab[, func_colname]), ]
     
-    group_starts <- attr(radixorder(contrib_tab[, samp_colname], contrib_tab[, func_colname], starts = TRUE, sort = FALSE), "starts")
+    group_starts <- attr(collapse::radixorder(contrib_tab[, samp_colname], contrib_tab[, func_colname], starts = TRUE, sort = FALSE), "starts")
     num_groups <- length(group_starts)
     
     sample_set <- contrib_tab[group_starts, samp_colname]
@@ -146,13 +146,13 @@ alpha_div_contrib <- function(metrics,
     
     } else if (workflow_type == "contrib_tab") {
       
-      prepped_taxa_present <- mclapply(1:(num_groups - 1),
-                                      function(i) {
-                                        contrib_tab[group_starts[i]:(group_starts[i + 1] - 1), abun_colname]
-                                      },
-                                      mc.cores = ncores)
+      prepped_taxa_present <- parallel::mclapply(1:(num_groups - 1),
+                                                function(i) {
+                                                  contrib_tab[group_starts[i]:(group_starts[i + 1] - 1), taxon_colname]
+                                                },
+                                                mc.cores = ncores)
       
-      prepped_taxa_present[[num_groups]] <- contrib_tab[group_starts[num_groups]:nrow(contrib_tab), abun_colname]
+      prepped_taxa_present[[num_groups]] <- contrib_tab[group_starts[num_groups]:nrow(contrib_tab), taxon_colname]
       
       sample_set_taxa_present <- sample_set
       func_set_taxa_present <- func_set
@@ -164,13 +164,13 @@ alpha_div_contrib <- function(metrics,
     div_metric_out[["faiths_pd"]]$sample <- sample_set_taxa_present
     div_metric_out[["faiths_pd"]]$func <- func_set_taxa_present
     
-    div_metric_out[["faiths_pd"]]$value <- unlist(mclapply(prepped_taxa_present,
-                                                    metric_functions[["faiths_pd"]],
-                                                    tree = in_tree,
-                                                    mc.cores = ncores))
-    
+    div_metric_out[["faiths_pd"]]$value <- unlist(parallel::mclapply(prepped_taxa_present,
+                                                                     metric_functions[["faiths_pd"]],
+                                                                     tree = in_tree,
+                                                                     mc.cores = ncores))
+                    
     div_metric_out[["faiths_pd"]] <- reshape2::dcast(data = div_metric_out[["faiths_pd"]],
-                                           formula = func ~ sample)
+                                                     formula = func ~ sample)
     
     rownames(div_metric_out[["faiths_pd"]]) <- div_metric_out[["faiths_pd"]]$func
     
@@ -195,16 +195,17 @@ alpha_div_contrib <- function(metrics,
       
     } else if (workflow_type == "contrib_tab") {
       
-      prepped_abun <- mclapply(1:(num_groups - 1),
-                              function(i) {
-                                contrib_tab[group_starts[i]:(group_starts[i + 1] - 1), abun_colname]
-                              },
-                              mc.cores = num_cores)
-      
+      prepped_abun <- parallel::mclapply(1:(num_groups - 1),
+                                         function(i) {
+                                           contrib_tab[group_starts[i]:(group_starts[i + 1] - 1), abun_colname]
+                                         },
+                                         mc.cores = ncores)
+                
       prepped_abun[[num_groups]] <- contrib_tab[group_starts[num_groups]:nrow(contrib_tab), abun_colname]
       
-      sample_set <- sample_set[prepped_abun_nonzero_i]
-      func_set <- func_set[prepped_abun_nonzero_i]
+      sample_set_nonzero_abun <- sample_set
+      func_set_nonzero_abun <- func_set
+    
     }
     
     for (m in metrics) {
@@ -214,9 +215,9 @@ alpha_div_contrib <- function(metrics,
       div_metric_out[[m]]$sample <- sample_set_nonzero_abun
       div_metric_out[[m]]$func <- func_set_nonzero_abun
       
-      div_metric_out[[m]]$value <- unlist(mclapply(prepped_taxa_present,
-                                                   metric_functions[[m]],
-                                                   mc.cores = ncores))
+      div_metric_out[[m]]$value <- unlist(parallel::mclapply(prepped_abun,
+                                                             metric_functions[[m]],
+                                                             mc.cores = ncores))
       
       div_metric_out[[m]] <- reshape2::dcast(data = div_metric_out[[m]],
                                              formula = func ~ sample)

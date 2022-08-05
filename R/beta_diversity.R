@@ -3,12 +3,16 @@
 beta_div_contrib <- function(func_tab = NULL,
                              abun_tab = NULL,
                              contrib_tab = NULL,
-                             metrics = c("binary", "kullback"),
+                             metrics = c("binary", "bray"),
                              func_ids = NULL,
                              return_objects = FALSE,
                              write_outfiles = FALSE,
                              outdir = NULL,
-                             ncores = 1) {
+                             ncores = 1,
+                             samp_colname = "sample",
+                             func_colname = "function.",
+                             abun_colname = "taxon_abun",
+                             taxon_colname = "taxon") {
   
   if (class(metrics) != "character") {
     stop("Stopping - \"metrics\" input argument must be a character vector.")
@@ -42,6 +46,8 @@ beta_div_contrib <- function(func_tab = NULL,
       stop("Stopping - \"abun_tab\" input argument must be a data.frame.")
     }
     
+    num_func <- nrow(func_tab)
+    
   } else if (! is.null(contrib_tab)) {
     
     workflow_type <- "contrib_tab"
@@ -53,6 +59,8 @@ beta_div_contrib <- function(func_tab = NULL,
     if (length(which(c(samp_colname, func_colname, taxon_colname, abun_colname) %in% colnames(contrib_tab))) < 4) {
       stop("Stopping - at least one of the specified \"samp_colname\", \"func_colname\", \"taxon_colname\", or \"abun_colname\" options is not present as a column name in \"contrib_tab\".")
     }
+    
+    num_func <- length(unique(contrib_tab[, func_colname]))
     
   }
   
@@ -75,7 +83,7 @@ beta_div_contrib <- function(func_tab = NULL,
   }
 
   
-  if (sum(c(return_objects, write_outfiles) != 1)) {
+  if (sum(c(return_objects, write_outfiles)) != 1) {
     stop("Stopping - one (but not both) of the return_objects or write_outfiles arguments must be set to TRUE.") 
   }
 
@@ -95,12 +103,12 @@ beta_div_contrib <- function(func_tab = NULL,
     stop("Stopping - \"outdir\" argument cannot be set unless \"write_outfiles = TRUE\".") 
   }
 
-  if (is.null(func_ids) && nrow(func_tab) > 100) {
+  if (is.null(func_ids) && num_func > 100) {
     
     message("The \"func_ids\" argument was not set, so beta diversity will be computed based on the taxonomic contributors for *every* function (i.e., row) of the input function table.")
     message("Note that if there are many functions that this can result in long running times and either extremely large objects returned or many files written.")
   
-  } else {
+  } else if (! is.null(func_ids)) {
     
     if (class(func_ids) != "character") {
       stop("Stopping - \"func_ids\" input argument must either be NULL or a character vector.")
@@ -137,6 +145,10 @@ beta_div_contrib <- function(func_tab = NULL,
     abun_tab <- subsetted_tables$abun
     rm(subsetted_tables)
     
+    # Sort function table in ascending order by function, and abundance table by sample id.
+    func_tab <- func_tab[sort(rownames(func_tab), decreasing = FALSE), ]
+    abun_tab <- abun_tab[, sort(colnames(abun_tab), decreasing = FALSE)]
+    
     prepped_contrib <- prep_func_contributor_dimnames(abun_tab = as.matrix(abun_tab),
                                                       func_tab = as.matrix(func_tab))
     
@@ -146,10 +158,14 @@ beta_div_contrib <- function(func_tab = NULL,
                                                                                        i = prepped_contrib[[func_i]][[1]] + 1,
                                                                                        j = prepped_contrib[[func_i]][[2]] + 1))
                                            
-                                           t(sweep(x = func_contrib_abun,
-                                                   MARGIN = 2,
-                                                   STATS = colSums(func_contrib_abun),
-                                                   FUN = '/'))
+                                           func_contrib_abun <- t(sweep(x = func_contrib_abun,
+                                                                        MARGIN = 2,
+                                                                        STATS = colSums(func_contrib_abun),
+                                                                        FUN = '/'))
+                                           
+                                           # Sort column names to be alphabetical order, which is needed to make sure the
+                                           # dtw metric produces the same result with either the multi-table or contrib table inputs.
+                                           func_contrib_abun[, sort(colnames(func_contrib_abun), decreasing = FALSE), drop = FALSE]
                                            
                                          },
                                          mc.cores = ncores)
@@ -162,7 +178,7 @@ beta_div_contrib <- function(func_tab = NULL,
     
     contrib_tab_split <- collapse::rsplit(x = contrib_tab, by = contrib_tab[, func_colname])
     
-    func_contrib_subsets <- mclapply(contrib_tab_split,
+    func_contrib_subsets <- parallel::mclapply(contrib_tab_split,
                                         function(x) {
                                           tab <- data.table::dcast.data.table(data = data.table(x),
                                                                       formula = x[, taxon_colname] ~ x[, samp_colname],
@@ -170,11 +186,11 @@ beta_div_contrib <- function(func_tab = NULL,
                                           
                                           tab[is.na(tab)] <- 0
                                           
-                                          rownames(tab) <- tab$contrib_tab_split
+                                          rownames(tab) <- tab$x
                                           
-                                          tab <- tab[, -1]
+                                          tab <- tab[, -1, drop = FALSE]
                                           
-                                          tab <- sweep(x = tab, MARGIN = 2, STATS = colSums(tab), '/') * 100
+                                          tab <- t(sweep(x = tab, MARGIN = 2, STATS = colSums(tab), '/'))
                                           
                                           return(tab)
                                         },
@@ -189,7 +205,7 @@ beta_div_contrib <- function(func_tab = NULL,
     all_dists <- list()
     
     for (metric in metrics) {
-    
+      
       all_dists[[metric]] <- parallel::mclapply(1:length(func_contrib_subsets),
     
                                      function(func_i) {
@@ -201,7 +217,7 @@ beta_div_contrib <- function(func_tab = NULL,
                                          
                                          func_dist[lower.tri(func_dist)] <- NA
                                          
-                                         return(func_dist)
+                                         return(data.frame(func_dist, check.names = FALSE))
                                        
                                        }, mc.cores = ncores)
 
@@ -240,7 +256,7 @@ beta_div_contrib <- function(func_tab = NULL,
                                                 mc.cores = 10)
     }
     
-    return("Results written to specified output directory.")
+    return(paste("Results written to:", outdir, sep = " "))
   
   }
 

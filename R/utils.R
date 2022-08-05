@@ -30,9 +30,9 @@ contrib_to_multitab <- function(contrib_tab,
   
   contrib_taxa_abun_wide <- data.frame(data.table::dcast.data.table(data = data.table(contrib_taxa_abun),
                                                                     formula = as.formula(paste(taxon_colname, "~", samp_colname, sep = " ")),
-                                                                    value.var = abun_colname))
+                                                                    value.var = abun_colname), check.names = FALSE)
   
-  rownames(contrib_taxa_abun_wide) <- contrib_taxa_abun_wide$taxon
+  rownames(contrib_taxa_abun_wide) <- as.character(contrib_taxa_abun_wide[, taxon_colname])
   contrib_taxa_abun_wide <- contrib_taxa_abun_wide[, -1]
   contrib_taxa_abun_wide[is.na(contrib_taxa_abun_wide)] <- 0
   
@@ -50,9 +50,9 @@ contrib_to_multitab <- function(contrib_tab,
   
   contrib_tab_func_copy_num_wide <- data.frame(data.table::dcast.data.table(data = data.table(contrib_tab_func_copy_num),
                                                                             formula = as.formula(paste(func_colname, "~", taxon_colname, sep = " ")),
-                                                                            value.var = copy.num_colname))
+                                                                            value.var = copy.num_colname), check.names = FALSE)
   
-  rownames(contrib_tab_func_copy_num_wide) <- contrib_tab_func_copy_num_wide$function.
+  rownames(contrib_tab_func_copy_num_wide) <- as.character(contrib_tab_func_copy_num_wide[, func_colname])
   contrib_tab_func_copy_num_wide <- contrib_tab_func_copy_num_wide[, -1]
   contrib_tab_func_copy_num_wide[is.na(contrib_tab_func_copy_num_wide)] <- 0
   
@@ -102,13 +102,13 @@ multitab_to_contrib <- function(func_tab,
                                                                          variable.name = samp_colname,
                                                                          value.name = abun_colname)
                                          
-                                         contrib_block <- contrib_block[which(contrib_block$taxon_abun > 0), , drop = FALSE]
+                                         contrib_block <- contrib_block[which(contrib_block[, abun_colname] > 0), , drop = FALSE]
                                          
                                          contrib_block[, samp_colname] <- as.character(contrib_block[, samp_colname])
                                          
                                          contrib_block[, func_colname] <- func_id
                                          
-                                         contrib_block[, copy.num_colname] <- as.numeric(func_tab[func_id, contrib_block$taxon])
+                                         contrib_block[, copy.num_colname] <- as.numeric(func_tab[func_id, contrib_block[, taxon_colname]])
                                          
                                          return(contrib_block)
                                          
@@ -133,7 +133,7 @@ func_abun_crossproduct <- function(in_abun, in_func) {
   
   in_func <- in_func[rownames(in_abun), ]
   
-  return(data.frame(t(crossprod(as.matrix(in_abun), as.matrix(in_func)))))
+  return(data.frame(t(crossprod(as.matrix(in_abun), as.matrix(in_func))), check.names = FALSE))
   
 }
 
