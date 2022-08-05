@@ -2,10 +2,6 @@
 
 library(FuncDiv)
 
-# For testing
-rm(list = ls(all.names = TRUE))
-setwd("/home/gdouglas/scripts/FuncDiv/tests/testthat/")
-
 # Read in test input files.
 contrib_tab <- read.table("../../example_files/contrib_input.tsv.gz",
                           sep = "\t", header = TRUE, stringsAsFactors = FALSE, quote = "", comment.char = "")
