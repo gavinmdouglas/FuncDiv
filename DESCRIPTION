@@ -21,8 +21,7 @@ Imports:
     collapse,
     data.table,
     parallel,
-    parallelDist,
-    reshape2
+    parallelDist
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
