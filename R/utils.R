@@ -118,11 +118,11 @@ multitab_to_contrib <- function(func_tab,
                                          
                                          abun_tab_subset[, taxon_colname] <- rownames(abun_tab_subset)
                                          
-                                         contrib_block <- reshape2::melt(data = abun_tab_subset,
-                                                                         id = taxon_colname,
-                                                                         variable.name = samp_colname,
-                                                                         value.name = abun_colname)
-                                         
+                                         contrib_block <- data.frame(data.table::melt.data.table(data = data.table::data.table(abun_tab_subset),
+                                                                                                 id.vars = taxon_colname,
+                                                                                                 variable.name = samp_colname,
+                                                                                                 value.name = abun_colname), check.names = FALSE)
+
                                          contrib_block <- contrib_block[which(contrib_block[, abun_colname] > 0), , drop = FALSE]
                                          
                                          contrib_block[, samp_colname] <- as.character(contrib_block[, samp_colname])

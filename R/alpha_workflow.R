@@ -195,8 +195,8 @@ alpha_div_contrib <- function(metrics,
                                                                      tree = in_tree,
                                                                      mc.cores = ncores))
                     
-    div_metric_out[["faiths_pd"]] <- reshape2::dcast(data = div_metric_out[["faiths_pd"]],
-                                                     formula = func ~ sample)
+    div_metric_out[["faiths_pd"]] <- data.frame(data.table::dcast.data.table(data = data.table::data.table(div_metric_out[["faiths_pd"]]),
+                                                                             formula = func ~ sample), check.names = FALSE)
     
     rownames(div_metric_out[["faiths_pd"]]) <- div_metric_out[["faiths_pd"]]$func
     
@@ -245,8 +245,9 @@ alpha_div_contrib <- function(metrics,
                                                              metric_functions[[m]],
                                                              mc.cores = ncores))
       
-      div_metric_out[[m]] <- reshape2::dcast(data = div_metric_out[[m]],
-                                             formula = func ~ sample)
+      div_metric_out[[m]] <- data.frame(data.table::dcast.data.table(data = data.table::data.table(div_metric_out[[m]]),
+                                                                     formula = func ~ sample), check.names = FALSE)
+        
       rownames(div_metric_out[[m]]) <- div_metric_out[[m]]$func
       div_metric_out[[m]] <- div_metric_out[[m]][, -1]
       
