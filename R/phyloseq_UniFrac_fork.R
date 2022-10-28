@@ -117,8 +117,8 @@ fast_weighted_UniFrac <- function(tips_abun, tree, ncores = 1) {
   UniFracMat <- matrix(NA_real_, num_samples, num_samples)
   rownames(UniFracMat) <- colnames(UniFracMat) <- colnames(tips_abun)
 
-  # Matrix-assign lower-triangle of UniFracMat. Then coerce to dist and return.
-  matIndices <- do.call(rbind, sample_combos)[, 2:1]
+  # Matrix-assign upper-triangle of UniFracMat. Then coerce to dist and return.
+  matIndices <- do.call(rbind, sample_combos)
 
   # Take care of edge case where there are two samples -> 1 pair of indices -> rbind doesn't return a matrix
   if (! is.matrix(matIndices)) matIndices <- matrix(matIndices, ncol = 2)
@@ -241,8 +241,8 @@ fast_unweighted_UniFrac <- function(tips_abun, tree, ncores = 1) {
   UniFracMat <- matrix(NA_real_, num_samples, num_samples)
   rownames(UniFracMat) <- colnames(UniFracMat) <- colnames(tips_abun)
   
-  # Matrix-assign lower-triangle of UniFracMat. Then coerce to dist and return.
-  matIndices <- do.call(rbind, sample_combos)[, 2:1]
+  # Matrix-assign upper-triangle of UniFracMat.
+  matIndices <- do.call(rbind, sample_combos)
   
   # Take care of edge case where there are two samples -> 1 pair of indices -> rbind doesn't return a matrix
   if (! is.matrix(matIndices)) matIndices <- matrix(matIndices, ncol = 2)
