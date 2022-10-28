@@ -249,9 +249,7 @@ beta_div_contrib <- function(metrics = c("binary", "bray"),
                                          func_dist <- as.matrix(parallelDist::parDist(func_contrib_subsets[[func_i]],
                                                                                       method = metric))
                                          
-                                         diag(func_dist) <- NA
-                                         
-                                         func_dist[lower.tri(func_dist)] <- NA
+                                         func_dist[lower.tri(func_dist, diag = TRUE)] <- NA
                                          
                                          return(data.frame(func_dist, check.names = FALSE))
                                        
