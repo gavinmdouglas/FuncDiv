@@ -1,3 +1,37 @@
+# Convenience object for programmatically computing beta diversity metrics.
+compute_betadiv <- list()
+
+parDist_methods <- c("bhjattacharyya", "bray", "canberra", "chord", 
+                     "divergence", "dtw", "euclidean", "fJaccard", "geodesic", 
+                     "hellinger", "kullback", "mahalanobis", "manhattan", 
+                     "maximum", "minkowski", "podani", "soergel", "wave", 
+                     "whittaker", "binary", "braun-blanquet", "dice", "fager", 
+                     "faith", "hamman", "kulczynski1", "kulczynski2", "michael", 
+                     "mountford", "mozley", "ochiai", "phi", "russel", "simple matching", 
+                     "simpson", "stiles", "tanimoto", "yule", "yule2", "cosine", "hamming")
+
+for (m in parDist_methods) {
+  compute_betadiv[[m]] <- function(in_tab, ...) {
+    func_dist <- as.matrix(parallelDist::parDist(in_tab, method = m))
+    func_dist[lower.tri(func_dist, diag = TRUE)] <- NA
+    return(func_dist)
+  }
+}
+
+compute_betadiv[["weighted_unifrac"]] <- function(in_tab, in_phylo) {
+  fast_weighted_UniFrac(in_tab, in_phylo)
+}
+
+compute_betadiv[["unweighted_unifrac"]] <- function(in_tab, in_phylo) {
+  fast_unweighted_UniFrac(in_tab, in_phylo)
+}
+
+compute_betadiv[["jensen_shannon_div"]] <- function(in_tab, ...) {
+  func_dist <- as.matrix(parallelDist::parDist(in_tab, method = "custom", func = jensen_shannon_divergence_FuncPtr))
+  func_dist[lower.tri(func_dist, diag = TRUE)] <- NA
+  return(func_dist)
+}
+
 #' Main function for computing contributional **beta** diversity
 #' 
 #' Based on joint taxa-function input data (i.e., contributional data), the beta diversity (i.e., inter-sample distance or divergence)
@@ -5,15 +39,16 @@
 #' can be returned, or alternatively these tables will be written to the disk as plain-text files.
 #' 
 #' Input data can be either a separate function copy number and taxonomic abundance table, or a joint contributional table.
-#' Specified metrics must be available through the `parallelDist::parDist` function. See `?parallelDist::parDist` for a description of all available metrics.
+#' Metrics must be one of "weighted_unifrac\", \"unweighted_unifrac\", \"jensen_shannon_div\", or a default metric available through the `parallelDist::parDist` function. See `?parallelDist::parDist` for a description of all default metrics.
 #' 
 #' The taxonomic abundances will be converted to relative abundances prior to computing inter-sample distances.
 #' 
-#' @param metrics beta diversity metrics to compute. Must be possible metrics computed by `parallelDist::parDist`.
+#' @param metrics beta diversity metrics to compute. Must be default metric computed by `parallelDist::parDist` or one of \"weighted_unifrac\", \"unweighted_unifrac\", or \"jensen_shannon_div\".
 #' @param func_tab data.frame object containing function copy numbers, with rows as functions and columns as taxa. Required if `abun_tab` is specified, and is mutually exclusive with `contrib_tab`.
 #' @param abun_tab data.frame object containing taxonomic abundances across samples, with rows as taxa and columns as samples. Required if `func_tab` is specified, and is mutually exclusive with `contrib_tab`.
 #' @param contrib_tab data.frame object containing combined taxa abundances and function copy numbers across taxa. Must contain columns corresponding to the sample ids, function ids, taxa ids, and taxa 
 #' abundances within samples. These column names are specified by the `samp_colname`, `func_colname`, `taxon_colname`, and `abun_colname`, respectively.Mutually exclusive with `abun_tab` and `func_tab`. 
+#' @param in_tree Phylo object to use if `weighted_unifrac` or `unweighted_unifrac` are specified.
 #' @param func_ids character vector specifying subset of function ids to include for analysis. Will analyze all functions present if this is not specified.
 #' @param return_objects Boolean vector of length one, specifying whether function should return a list of all output distance tables (nested by metric name, and then by function id). Incompatible with `write_outfiles`.
 #' @param write_outfiles Boolean vector of length one, specifying whether function write all distance tables to plain-text files in the specified `outdir` location. Incompatible with `return_objects`.
@@ -25,10 +60,11 @@
 #' @param abun_colname taxonomic abundance (within each sample) column name of `contrib_tab` input data.frame.
 #'
 #' @export
-beta_div_contrib <- function(metrics = c("binary", "bray"),
+beta_div_contrib <- function(metrics = NULL,
                              func_tab = NULL,
                              abun_tab = NULL,
                              contrib_tab = NULL,
+                             in_tree = NULL,
                              func_ids = NULL,
                              return_objects = FALSE,
                              write_outfiles = FALSE,
@@ -39,6 +75,10 @@ beta_div_contrib <- function(metrics = c("binary", "bray"),
                              taxon_colname = "taxon",
                              abun_colname = "taxon_abun") {
   
+  if (length(metrics) == 0) {
+    stop("Stopping - at least one metric must be specified.")  
+  }
+
   if (class(metrics) != "character") {
     stop("Stopping - \"metrics\" input argument must be a character vector.")
   }
@@ -106,7 +146,6 @@ beta_div_contrib <- function(metrics = c("binary", "bray"),
   } else {
    ncores <- as.integer(ncores) 
   }
-
   
   if (sum(c(return_objects, write_outfiles)) != 1) {
     stop("Stopping - one (but not both) of the return_objects or write_outfiles arguments must be set to TRUE.") 
@@ -158,19 +197,31 @@ beta_div_contrib <- function(metrics = c("binary", "bray"),
     }
   
   }
-    
-  parDist_methods <- c("bhjattacharyya", "bray", "canberra", "chord", 
-                       "divergence", "dtw", "euclidean", "fJaccard", "geodesic", 
-                       "hellinger", "kullback", "mahalanobis", "manhattan", 
-                       "maximum", "minkowski", "podani", "soergel", "wave", 
-                       "whittaker", "binary", "braun-blanquet", "dice", "fager", 
-                       "faith", "hamman", "kulczynski1", "kulczynski2", "michael", 
-                       "mountford", "mozley", "ochiai", "phi", "russel", "simple matching", 
-                       "simpson", "stiles", "tanimoto", "yule", "yule2", "cosine", "hamming")
   
-  if (length(which(! metrics %in% parDist_methods)) > 0) {
-    stop("Stopping - the following specified distance/divergence metrics are not available through parallelDist::parDist:\n   ",
-         paste(metrics[which(! metrics %in% parDist_methods)], collapse = " "))
+  other_methods <- c("weighted_unifrac", "unweighted_unifrac", "jensen_shannon_div")
+  
+  all_methods <- c(parDist_methods, other_methods)
+  
+  if (length(which(! metrics %in% all_methods) > 0) {
+    stop("Stopping - the following specified distance/divergence metrics are not amongst the possible options for this function (including the metrics available through parallelDist::parDist):\n   ",
+         paste(metrics[which(! metrics %in% all_methods)], collapse = " "))
+  }
+  
+  if (any(c("weighted_unifrac", "unweighted_unifrac") %in% metrics)) {
+
+    # Run sanity checks on input tree if UniFrac approach specified.
+    if (is.null(in_tree)) {
+      stop("Stopping - \"in_tree\" parameter must be set when \"weighted_unifrac\" or \"unweighted_unifrac\" are specified.") 
+    }
+    
+    if (is.null(in_tree$edge.length)) {
+      stop("Stopping - input tree has no branch lengths, so UniFrac distances cannot be computed.")
+    }
+    
+    if (! ape::is.rooted(in_tree)) {
+      stop("Stopping - rooted input tree required for UniFrac calculation.")
+    }
+    
   }
   
   if (workflow_type == "multi_tab") {
@@ -241,22 +292,19 @@ beta_div_contrib <- function(metrics = c("binary", "bray"),
     all_dists <- list()
     
     for (metric in metrics) {
-      
+
       all_dists[[metric]] <- parallel::mclapply(1:length(func_contrib_subsets),
     
                                      function(func_i) {
             
-                                         func_dist <- as.matrix(parallelDist::parDist(func_contrib_subsets[[func_i]],
-                                                                                      method = metric))
-                                         
-                                         func_dist[lower.tri(func_dist, diag = TRUE)] <- NA
+                                         func_dist <- compute_betadiv[[metric]](func_contrib_subsets[[func_i]], in_tree)
                                          
                                          return(data.frame(func_dist, check.names = FALSE))
                                        
                                        }, mc.cores = ncores)
 
       names(all_dists[[metric]]) <- func_ordered
-      
+
     }
     
     return(all_dists)
@@ -268,26 +316,22 @@ beta_div_contrib <- function(metrics = c("binary", "bray"),
       dir.create(paste(outdir, metric, sep = "/"))
       
       null_return <- parallel::mclapply(1:length(func_contrib_subsets),
-                                        
-                                                function(func_i) {
-                                                  
-                                                    func_id <- rownames(func_tab)[func_i]
+                                          
+                                                  function(func_i) {
                                                     
-                                                    outfile <- paste(outdir, "/", metric, "/", func_id, ".tsv", sep = "")
-                                                    
-                                                    func_dist <- as.matrix(parallelDist::parDist(func_contrib_subsets[[func_i]],
-                                                                                                 method = metric))
-                                                    diag(func_dist) <- NA
-                                                    
-                                                    func_dist[lower.tri(func_dist)] <- NA
-                                                    
-                                                    data.table::fwrite(x = data.table::data.table(func_dist),
-                                                                       file = outfile,
-                                                                       sep = "\t", row.names = FALSE, col.names = TRUE, quote = FALSE, na = "")
-                                                    
-                                                    return(NULL)
-                                                },
-                                                mc.cores = 10)
+                                                      func_id <- rownames(func_tab)[func_i]
+                                                      
+                                                      outfile <- paste(outdir, "/", metric, "/", func_id, ".tsv", sep = "")
+                                                      
+                                                      func_dist <- compute_betadiv[[metric]](func_contrib_subsets[[func_i]], in_tree)
+
+                                                      data.table::fwrite(x = data.table::data.table(func_dist),
+                                                                         file = outfile,
+                                                                         sep = "\t", row.names = FALSE, col.names = TRUE, quote = FALSE, na = "")
+                                                      
+                                                      return(NULL)
+                                                  },
+                                                  mc.cores = 10)
     }
     
     return(paste("Results written to:", outdir, sep = " "))
