@@ -1,0 +1,1 @@
+This repository contains modified code (specifically in `R/phyloseq_UniFrac_fork.R`) from version 1.42.0 of the `phyloseq` R package ([link to original source code](https://github.com/joey711/phyloseq)). The original code is distributed under a [GNU Affero General Public License](https://www.gnu.org/licenses/agpl-3.0.en.html).
