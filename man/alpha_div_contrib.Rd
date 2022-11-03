@@ -29,14 +29,14 @@ alpha_div_contrib(
 \item{contrib_tab}{data.frame object containing combined taxa abundances and function copy numbers across taxa. Must contain columns corresponding to the sample ids, function ids, taxa ids, and taxa
 abundances within samples. These column names are specified by the \code{samp_colname}, \code{func_colname}, \code{taxon_colname}, and \code{abun_colname}, respectively. Mutually exclusive with \code{abun_tab} and \code{func_tab}.}
 
-\item{in_tree}{phylo object to use if \code{faiths_pd} is specified.}
+\item{in_tree}{Phylo object to use if \code{faiths_pd} is specified.}
 
 \item{ncores}{integer indicating number of cores to use for parallelizable steps.}
 
 \item{replace_NA}{Boolean vector of length one, indicating whether all NA's in the output of all metrics should be converted to 0's. Note that this done automatically done for \code{richness} either way.}
 
 \item{custom_metric_functions}{List object containing custom alpha diversity metric functions. This overrides \code{FuncDiv_alpha_metrics} when specified. The list element names must correspond to at
-least some of the names indicated by the \code{metrics} parameter.}
+least the names indicated by the \code{metrics} parameter.}
 
 \item{samp_colname}{sample id column name of \code{contrib_tab} input data.frame.}
 

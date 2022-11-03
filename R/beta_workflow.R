@@ -10,12 +10,15 @@ parDist_methods <- c("bhjattacharyya", "bray", "canberra", "chord",
                      "mountford", "mozley", "ochiai", "phi", "russel", "simple matching", 
                      "simpson", "stiles", "tanimoto", "yule", "yule2", "cosine", "hamming")
 
+
 for (m in parDist_methods) {
-  compute_betadiv[[m]] <- function(in_tab, ...) {
-    func_dist <- as.matrix(parallelDist::parDist(in_tab, method = m))
-    func_dist[lower.tri(func_dist, diag = TRUE)] <- NA
-    return(func_dist)
-  }
+  func_dist_cmd_char <- paste("function(in_tab, ...) {\n",
+                              "func_dist <- as.matrix(parallelDist::parDist(in_tab, method = \"", eval(m), "\"))\n",
+                              "func_dist[lower.tri(func_dist, diag = TRUE)] <- NA\n",
+                              "return(func_dist)\n}", sep = "")
+  
+  compute_betadiv[[m]] <- eval(parse(text = func_dist_cmd_char))
+    
 }
 
 compute_betadiv[["weighted_unifrac"]] <- function(in_tab, in_phylo) {
@@ -39,7 +42,7 @@ compute_betadiv[["jensen_shannon_div"]] <- function(in_tab, ...) {
 #' can be returned, or alternatively these tables will be written to the disk as plain-text files.
 #' 
 #' Input data can be either a separate function copy number and taxonomic abundance table, or a joint contributional table.
-#' Metrics must be one of "weighted_unifrac\", \"unweighted_unifrac\", \"jensen_shannon_div\", or a default metric available through the `parallelDist::parDist` function. See `?parallelDist::parDist` for a description of all default metrics.
+#' Metrics must be one of "weighted_unifrac", "unweighted_unifrac", "jensen_shannon_div", or a default metric available through the `parallelDist::parDist` function. See `?parallelDist::parDist` for a description of all default metrics.
 #' 
 #' The taxonomic abundances will be converted to relative abundances prior to computing inter-sample distances.
 #' 
@@ -202,7 +205,7 @@ beta_div_contrib <- function(metrics = NULL,
   
   all_methods <- c(parDist_methods, other_methods)
   
-  if (length(which(! metrics %in% all_methods) > 0) {
+  if (length(which(! metrics %in% all_methods) > 0)) {
     stop("Stopping - the following specified distance/divergence metrics are not amongst the possible options for this function (including the metrics available through parallelDist::parDist):\n   ",
          paste(metrics[which(! metrics %in% all_methods)], collapse = " "))
   }

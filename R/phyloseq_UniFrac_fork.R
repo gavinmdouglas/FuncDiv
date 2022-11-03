@@ -17,22 +17,25 @@
 #' http://www.nature.com/ismej/journal/v4/n1/full/ismej200997a.html
 #' 
 #' @param tips_abun data.frame object containing taxonomic abundances across samples, with rows as taxa and columns as samples.
-#' @param in_tree phylo object, which must contain all row names of `tips_abun` as tip labels.
+#' @param tree phylo object, which must contain all row names of `tips_abun` as tip labels.
 #' @param ncores integer indicating number of cores to use for parallelizable steps.
 #' 
 #' @export
 fast_weighted_UniFrac <- function(tips_abun, tree, ncores = 1) {
   
+  tips_abun <- t(tips_abun)
+  
   # Subset tree to be just rownames of intable.
-  if (length(which(! rownames(tips_abun) %in% tree$tip.label) > 0)) {
+  if (length(which(! rownames(tips_abun) %in% tree$tip.label)) > 0) {
     stop("Stopping - some features in sample are not found as tips in the tree.")
   }
   
-  if (length(which(! tree$tip.label %in% rownames(tips_abun)) > 0)) {
+  if (length(which(! tree$tip.label %in% rownames(tips_abun))) > 0) {
     tree <- ape::drop.tip(phy = tree,
                           tip = tree$tip.label[which(! tree$tip.label %in% rownames(tips_abun))],
                           trim.internal = TRUE)
   }
+  
   
   # Make sure tree is in postorder order for weighted UniFrac.
   tree = ape::reorder.phylo(tree, order = "postorder")
@@ -99,7 +102,7 @@ fast_weighted_UniFrac <- function(tips_abun, tree, ncores = 1) {
   
   samplesums = colSums(tips_abun)
   
-  distlist <- mclapply(sample_combos,
+  distlist <- parallel::mclapply(sample_combos,
                        function(i) {
                                     A  <- i[1]
                                     B  <- i[2]
@@ -157,26 +160,28 @@ fast_weighted_UniFrac <- function(tips_abun, tree, ncores = 1) {
 #' 
 #' 
 #' @param tips_abun data.frame object containing taxonomic abundances across samples, with rows as taxa and columns as samples.
-#' @param in_tree phylo object, which must contain all row names of `tips_abun` as tip labels.
+#' @param tree phylo object, which must contain all row names of `tips_abun` as tip labels.
 #' @param ncores integer indicating number of cores to use for parallelizable steps.
 #'
 #' @export
-fast_unweighted_UniFrac <- function(tips_abun, in_tree, ncores = 1) {
+fast_unweighted_UniFrac <- function(tips_abun, tree, ncores = 1) {
+  
+  tips_abun <- t(tips_abun)
   
   # Subset tree to be just rownames of intable.
-  if (length(which(! rownames(tips_abun) %in% in_tree$tip.label) > 0)) {
+  if (length(which(! rownames(tips_abun) %in% tree$tip.label)) > 0) {
     stop("Stopping - some features in sample are not found as tips in the tree.")
   }
   
-  if (length(which(! in_tree$tip.label %in% rownames(tips_abun)) > 0)) {
+  if (length(which(! tree$tip.label %in% rownames(tips_abun))) > 0) {
     tree <- ape::drop.tip(phy = tree,
-                          tip = in_tree$tip.label[which(! in_tree$tip.label %in% rownames(tips_abun))],
-                          trim.internal = TRUE)
+                             tip = tree$tip.label[which(! tree$tip.label %in% rownames(tips_abun))],
+                             trim.internal = TRUE)
   }
   
   # Re-order rows to match tip label order if needed.
-  if (! identical(rownames(tips_abun), in_tree$tip.label)){
-    tips_abun <- tips_abun[in_tree$tip.label, ]
+  if (! identical(rownames(tips_abun), tree$tip.label)){
+    tips_abun <- tips_abun[tree$tip.label, ]
   }
   
   tips_abun <- as.matrix(tips_abun)
@@ -194,32 +199,32 @@ fast_unweighted_UniFrac <- function(tips_abun, in_tree, ncores = 1) {
   # `edge_array`
   
   # Create a list of descendants, starting from the first internal node (root)
-  ntip <- length(in_tree$tip.label)
+  ntip <- length(tree$tip.label)
   num_samples <- ncol(tips_abun)
   
   # Create a matrix that maps each internal node to its 2 descendants
   # This matrix doesn't include the tips, so must use node#-ntip to index into it
-  node.desc <- matrix(in_tree$edge[order(in_tree$edge[, 1]), 2], byrow = TRUE, ncol = 2)
+  node.desc <- matrix(tree$edge[order(tree$edge[, 1]), 2], byrow = TRUE, ncol = 2)
   
   # Define the edge_array object
   # Right now this is a node_array object, each row is a node (including tips)
-  # It will be subset and ordered to match in_tree$edge later
-  edge_array <- matrix(0, nrow = ntip + in_tree$Nnode, ncol = num_samples, 
+  # It will be subset and ordered to match tree$edge later
+  edge_array <- matrix(0, nrow = ntip + tree$Nnode, ncol = num_samples, 
                        dimnames = list(NULL, sample_names = colnames(tips_abun)))
   
   # Load the tip counts in directly
   edge_array[1:ntip, ] <- as.matrix(tips_abun)
   
   # Get a list of internal nodes ordered by increasing depth
-  ord.node <- order(ape::node.depth(tree))[(ntip + 1):(ntip + in_tree$Nnode)]
+  ord.node <- order(ape::node.depth(tree))[(ntip + 1):(ntip + tree$Nnode)]
   
   # Loop over internal nodes, summing their descendants to get the nodes count
   for (i in ord.node) {
     edge_array[i, ] <- colSums(edge_array[node.desc[i - ntip, ], , drop = FALSE], na.rm = TRUE)
   }
   
-  # Keep only those with a parental edge (i.e., drop root) and order to match in_tree$edge
-  edge_array <- edge_array[in_tree$edge[, 2], ]
+  # Keep only those with a parental edge (i.e., drop root) and order to match tree$edge
+  edge_array <- edge_array[tree$edge[, 2], ]
   
   # Remove unneeded variable.
   rm(node.desc)
@@ -229,7 +234,7 @@ fast_unweighted_UniFrac <- function(tips_abun, in_tree, ncores = 1) {
   
   samplesums = colSums(tips_abun)
   
-  distlist <- mclapply(sample_combos,
+  distlist <- parallel::mclapply(sample_combos,
                        function(i) {
                          A  <- i[1]
                          B  <- i[2]
@@ -241,10 +246,10 @@ fast_unweighted_UniFrac <- function(tips_abun, in_tree, ncores = 1) {
                          edge_occ_AB <- edge_occ[, c(A, B)]
  
                          # Keep only the unique branches. Sum the lengths
-                         edge_uni_AB_sum <- sum((in_tree$edge.length * edge_occ_AB)[rowSums(edge_occ_AB, na.rm = TRUE) < 2, ], na.rm = TRUE)
+                         edge_uni_AB_sum <- sum((tree$edge.length * edge_occ_AB)[rowSums(edge_occ_AB, na.rm = TRUE) < 2, ], na.rm = TRUE)
 
                          # Normalize this sum to the total branches among these two samples, A and B
-                         uwUFpairdist <- edge_uni_AB_sum / sum(in_tree$edge.length[rowSums(edge_occ_AB, na.rm = TRUE) > 0])
+                         uwUFpairdist <- edge_uni_AB_sum / sum(tree$edge.length[rowSums(edge_occ_AB, na.rm = TRUE) > 0])
 
                          return(uwUFpairdist)
                        },

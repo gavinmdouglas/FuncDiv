@@ -5,10 +5,11 @@
 \title{Main function for computing contributional \strong{beta} diversity}
 \usage{
 beta_div_contrib(
-  metrics = c("binary", "bray"),
+  metrics = NULL,
   func_tab = NULL,
   abun_tab = NULL,
   contrib_tab = NULL,
+  in_tree = NULL,
   func_ids = NULL,
   return_objects = FALSE,
   write_outfiles = FALSE,
@@ -21,7 +22,7 @@ beta_div_contrib(
 )
 }
 \arguments{
-\item{metrics}{beta diversity metrics to compute. Must be possible metrics computed by \code{parallelDist::parDist}.}
+\item{metrics}{beta diversity metrics to compute. Must be default metric computed by \code{parallelDist::parDist} or one of \"weighted_unifrac\", \"unweighted_unifrac\", or \"jensen_shannon_div\".}
 
 \item{func_tab}{data.frame object containing function copy numbers, with rows as functions and columns as taxa. Required if \code{abun_tab} is specified, and is mutually exclusive with \code{contrib_tab}.}
 
@@ -29,6 +30,8 @@ beta_div_contrib(
 
 \item{contrib_tab}{data.frame object containing combined taxa abundances and function copy numbers across taxa. Must contain columns corresponding to the sample ids, function ids, taxa ids, and taxa
 abundances within samples. These column names are specified by the \code{samp_colname}, \code{func_colname}, \code{taxon_colname}, and \code{abun_colname}, respectively.Mutually exclusive with \code{abun_tab} and \code{func_tab}.}
+
+\item{in_tree}{Phylo object to use if \code{weighted_unifrac} or \code{unweighted_unifrac} are specified.}
 
 \item{func_ids}{character vector specifying subset of function ids to include for analysis. Will analyze all functions present if this is not specified.}
 
@@ -55,7 +58,7 @@ can be returned, or alternatively these tables will be written to the disk as pl
 }
 \details{
 Input data can be either a separate function copy number and taxonomic abundance table, or a joint contributional table.
-Specified metrics must be available through the \code{parallelDist::parDist} function. See \code{?parallelDist::parDist} for a description of all available metrics.
+Metrics must be one of "weighted_unifrac", "unweighted_unifrac", "jensen_shannon_div", or a default metric available through the \code{parallelDist::parDist} function. See \code{?parallelDist::parDist} for a description of all default metrics.
 
 The taxonomic abundances will be converted to relative abundances prior to computing inter-sample distances.
 }
