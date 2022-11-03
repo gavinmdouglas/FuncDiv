@@ -14,6 +14,7 @@ func_tab <- read.table("../../example_files/func_input.tsv.gz", header = TRUE, s
 
 abun_tab <- read.table("../../example_files/taxa_input.tsv.gz", header = TRUE, sep = "\t", row.names = 1)
 
+test_tree <- ape::read.tree("../../example_files/taxa.tree")
 
 func_tab_num.added <- func_tab
 rownames(func_tab_num.added) <- paste("111", rownames(func_tab_num.added), sep = "")
@@ -150,7 +151,7 @@ test_that("beta_div_contrib returns same values no matter whether input abundanc
                               ncores = 1,
                               return_objects = TRUE)
   
-  expect_equal(orig_out, rel_out)
+  expect_equal(rel_out, orig_out)
   
 })
 
@@ -172,7 +173,7 @@ test_that("beta_div_contrib check dist values for random sample / KO combo #1 ou
                     1.5707963267949, 1.4142135623731, NaN, 2, 1, 1.4142135623731, 2, 1,
                     2, 1, 1, 1, 1, 0.5, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, -Inf, 1, 0, 0, 1, 1)
   
-  expect_equal(expected_out, observed_out)
+  expect_equal(observed_out, expected_out)
   
 })
 
@@ -265,7 +266,99 @@ test_that("beta_div_contrib works correctly with func_ids input, repeating earli
                     0.928571428571429, 0.928571428571429, 0.857142857142857, -0.986732143575568,
                     0.962962962962963, 0, 0, 0.998221512553748, 1)
   
-  expect_equal(expected_out, observed_out)
+  expect_equal(observed_out, expected_out)
+  
+})
+
+
+test_that("beta_div_contrib produces correct weighted UniFrac values", {
+  
+  contrib_tab_subset <- contrib_tab[which(contrib_tab$samp %in% c("ERR1190790", "ERR1190797", "ERR1190798", "ERR1190806",
+                                                                  "ERR1190816", "ERR1305892", "ERR1190946", "SRR5963251",
+                                                                  "SRR3466404", "SRR5963379", "SRR1825367", "SRR6257471")), ]
+  
+  all_out <- beta_div_contrib(metrics = "weighted_unifrac",
+                              contrib_tab = contrib_tab_subset,
+                              func_ids = "K11070",
+                              in_tree = test_tree,
+                              ncores = 1, 
+                              return_objects = TRUE,
+                              samp_colname = "samp",
+                              func_colname = "func",
+                              taxon_colname = "tax",
+                              abun_colname = "tax_abun")
+
+  observed_out <- c(all_out$weighted_unifrac$K11070["ERR1190790", "ERR1190797"],
+                    all_out$weighted_unifrac$K11070["ERR1190798", "ERR1190806"],
+                    all_out$weighted_unifrac$K11070["ERR1190816", "ERR1305892"],
+                    all_out$weighted_unifrac$K11070["ERR1190946", "SRR5963251"],
+                    all_out$weighted_unifrac$K11070["SRR3466404", "SRR5963379"],
+                    all_out$weighted_unifrac$K11070["SRR1825367", "SRR6257471"])
+
+  expected_out <- c(0.7610414, 0.8367802, 0.8089426, 0.7929137, 0.7888812, 0.9899804)
+  
+  expect_equal(observed_out, expected_out, tolerance = 1e-07)
+  
+})
+
+
+
+test_that("beta_div_contrib produces correct unweighted UniFrac values", {
+  
+  contrib_tab_subset <- contrib_tab[which(contrib_tab$samp %in% c("ERR1190790", "ERR1190797", "ERR1190798", "ERR1190806",
+                                                                  "ERR1190816", "ERR1305892", "ERR1190946", "SRR5963251",
+                                                                  "SRR3466404", "SRR5963379", "SRR1825367", "SRR6257471")), ]
+  
+  all_out <- beta_div_contrib(metrics = "unweighted_unifrac",
+                              contrib_tab = contrib_tab_subset,
+                              func_ids = "K11070",
+                              in_tree = test_tree,
+                              ncores = 1, 
+                              return_objects = TRUE,
+                              samp_colname = "samp",
+                              func_colname = "func",
+                              taxon_colname = "tax",
+                              abun_colname = "tax_abun")
+  
+  observed_out <- c(all_out$unweighted_unifrac$K11070["ERR1190790", "ERR1190797"],
+                    all_out$unweighted_unifrac$K11070["ERR1190798", "ERR1190806"],
+                    all_out$unweighted_unifrac$K11070["ERR1190816", "ERR1305892"],
+                    all_out$unweighted_unifrac$K11070["ERR1190946", "SRR5963251"],
+                    all_out$unweighted_unifrac$K11070["SRR3466404", "SRR5963379"],
+                    all_out$unweighted_unifrac$K11070["SRR1825367", "SRR6257471"])
+  
+  expected_out <- c(0.7570614, 0.7911921, 0.6419828, 0.9786591, 0.7802325, 0.9739450)
+  
+  expect_equal(observed_out, expected_out, tolerance = 1e-07)
+  
+})
+
+
+test_that("beta_div_contrib produces correct Jensen-Shannon divergence values", {
+  
+  all_out <- beta_div_contrib(metrics = "jensen_shannon_div",
+                              func_tab = func_tab,
+                              abun_tab = abun_tab[, c("ERR1190790", "ERR1190797", "ERR1190798", "ERR1190806",
+                                                      "ERR1190816", "ERR1305892", "ERR1190946", "SRR5963251",
+                                                      "SRR3466404", "SRR5963379", "SRR1825367", "SRR6257471")] + 1,
+                              func_ids = "K11070",
+                              ncores = 1, 
+                              return_objects = TRUE,
+                              samp_colname = "samp",
+                              func_colname = "func",
+                              taxon_colname = "tax",
+                              abun_colname = "tax_abun")
+  
+  observed_out <- c(all_out$jensen_shannon_div$K11070["ERR1190790", "ERR1190797"],
+                    all_out$jensen_shannon_div$K11070["ERR1190798", "ERR1190806"],
+                    all_out$jensen_shannon_div$K11070["ERR1190816", "ERR1305892"],
+                    all_out$jensen_shannon_div$K11070["ERR1190946", "SRR5963251"],
+                    all_out$jensen_shannon_div$K11070["SRR3466404", "SRR5963379"],
+                    all_out$jensen_shannon_div$K11070["SRR1825367", "SRR6257471"])
+  
+  expected_out <- c(0.4104305, 0.3295498, 0.3248088, 0.3115956, 0.3159707, 0.2849792)
+  
+  expect_equal(observed_out, expected_out, tolerance = 1e-7)
   
 })
 
@@ -295,7 +388,7 @@ test_that("beta_div_contrib (multi-tab input) returns same values when numbers a
     }
   }
   
-  expect_equal(orig_out, number_out)
+  expect_equal(number_out, orig_out)
   
 })
 
@@ -331,7 +424,7 @@ test_that("beta_div_contrib (contrib input) returns same values when numbers at 
     }
   }
   
-  expect_equal(orig_out, number_out)
+  expect_equal(number_out, orig_out)
   
 })
 
