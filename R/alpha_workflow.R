@@ -142,6 +142,8 @@ alpha_div_contrib <- function(metrics,
     
   } else if (workflow_type == "contrib_tab") {
    
+    contrib_tab <- contrib_tab[which(contrib_tab[, abun_colname] > 0), , drop = FALSE]
+    
     contrib_tab <- contrib_tab[, c(samp_colname, func_colname, taxon_colname, abun_colname)]
     
     contrib_tab <- contrib_tab[collapse::radixorder(contrib_tab[, samp_colname], contrib_tab[, func_colname]), ]

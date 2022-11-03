@@ -264,6 +264,8 @@ beta_div_contrib <- function(metrics = NULL,
 
   } else if (workflow_type == "contrib_tab") {
     
+    contrib_tab <- contrib_tab[which(contrib_tab[, abun_colname] > 0), , drop = FALSE]
+    
     contrib_tab <- contrib_tab[, c(samp_colname, func_colname, taxon_colname, abun_colname)]
     
     contrib_tab_split <- collapse::rsplit(x = contrib_tab, by = contrib_tab[, func_colname])
