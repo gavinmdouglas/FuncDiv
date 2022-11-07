@@ -42,11 +42,18 @@ fast_weighted_UniFrac <- function(tips_abun, tree, ncores = 1) {
   
   # Re-order rows to match tip label order if needed.
   if (! identical(rownames(tips_abun), tree$tip.label)){
-    tips_abun <- tips_abun[tree$tip.label, ]
+    tips_abun <- tips_abun[tree$tip.label, , drop = FALSE]
   }
   
   tips_abun <- as.matrix(tips_abun)
   
+  if (ncol(tips_abun) == 1) {
+    null_out <- matrix(NA, nrow = 1, ncol = 1)
+    rownames(null_out) <- colnames(tips_abun)[1]
+    colnames(null_out) <- colnames(tips_abun)[1]
+    return(null_out)
+  }
+
   # Create N x 2 matrix of all pairwise combinations of samples.
   sample_combos <- combn(colnames(tips_abun), 2, simplify = FALSE)
   
@@ -181,11 +188,18 @@ fast_unweighted_UniFrac <- function(tips_abun, tree, ncores = 1) {
   
   # Re-order rows to match tip label order if needed.
   if (! identical(rownames(tips_abun), tree$tip.label)){
-    tips_abun <- tips_abun[tree$tip.label, ]
+    tips_abun <- tips_abun[tree$tip.label, , drop = FALSE]
   }
   
   tips_abun <- as.matrix(tips_abun)
   
+  if (ncol(tips_abun) == 1) {
+    null_out <- matrix(NA, nrow = 1, ncol = 1)
+    rownames(null_out) <- colnames(tips_abun)[1]
+    colnames(null_out) <- colnames(tips_abun)[1]
+    return(null_out)
+  }
+
   # Create N x 2 matrix of all pairwise combinations of samples.
   sample_combos <- combn(colnames(tips_abun), 2, simplify = FALSE)
   
