@@ -336,7 +336,7 @@ beta_div_contrib <- function(metrics = NULL,
                                                       
                                                       return(NULL)
                                                   },
-                                                  mc.cores = 10)
+                                                  mc.cores = ncores)
     }
     
     return(paste("Results written to:", outdir, sep = " "))
