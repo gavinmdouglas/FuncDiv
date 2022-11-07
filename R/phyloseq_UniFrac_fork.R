@@ -85,7 +85,7 @@ fast_weighted_UniFrac <- function(tips_abun, tree, ncores = 1) {
   }
   
   # Keep only those with a parental edge (i.e., drop root) and order to match tree$edge
-  edge_array <- edge_array[tree$edge[, 2], ]
+  edge_array <- edge_array[tree$edge[, 2], , drop = FALSE]
   
   # Remove unneeded variable.
   rm(node.desc)
@@ -224,7 +224,7 @@ fast_unweighted_UniFrac <- function(tips_abun, tree, ncores = 1) {
   }
   
   # Keep only those with a parental edge (i.e., drop root) and order to match tree$edge
-  edge_array <- edge_array[tree$edge[, 2], ]
+  edge_array <- edge_array[tree$edge[, 2], , drop = FALSE]
   
   # Remove unneeded variable.
   rm(node.desc)
