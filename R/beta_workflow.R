@@ -13,7 +13,7 @@ parDist_methods <- c("bhjattacharyya", "bray", "canberra", "chord",
 
 for (m in parDist_methods) {
   func_dist_cmd_char <- paste("function(in_tab, ...) {\n",
-                              "func_dist <- as.matrix(parallelDist::parDist(in_tab, method = \"", eval(m), "\"))\n",
+                              "func_dist <- as.matrix(parallelDist::parDist(in_tab, method = \"", eval(m), "\", threads = 1))\n",
                               "func_dist[lower.tri(func_dist, diag = TRUE)] <- NA\n",
                               "return(func_dist)\n}", sep = "")
   
@@ -30,7 +30,7 @@ compute_betadiv[["unweighted_unifrac"]] <- function(in_tab, in_phylo) {
 }
 
 compute_betadiv[["jensen_shannon_div"]] <- function(in_tab, ...) {
-  func_dist <- as.matrix(parallelDist::parDist(in_tab, method = "custom", func = jensen_shannon_divergence_FuncPtr))
+  func_dist <- as.matrix(parallelDist::parDist(in_tab, method = "custom", func = jensen_shannon_divergence_FuncPtr, threads = 1))
   func_dist[lower.tri(func_dist, diag = TRUE)] <- NA
   return(func_dist)
 }
