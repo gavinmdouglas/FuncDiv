@@ -12,10 +12,12 @@ RoxygenNote: 7.2.3
 Depends:
     Rcpp,
     RcppArmadillo,
+    RcppParallel,
     RcppXPtrUtils
 LinkingTo:
     Rcpp,
     RcppArmadillo,
+    RcppParallel,
     RcppXPtrUtils
 Imports:
     ape,
