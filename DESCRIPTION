@@ -1,6 +1,6 @@
 Package: FuncDiv
 Title: Compute contributional diversity metrics
-Version: 0.5.0
+Version: 0.6.0
 Authors@R:
     person("Gavin", "Douglas", , "gavinmdouglas@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-5164-6707"))

@@ -295,9 +295,9 @@ test_that("beta_div_contrib produces correct weighted UniFrac values", {
                     all_out$weighted_unifrac$K11070["SRR3466404", "SRR5963379"],
                     all_out$weighted_unifrac$K11070["SRR1825367", "SRR6257471"])
 
-  expected_out <- c(0.7610414, 0.8367802, 0.8089426, 0.7929137, 0.7888812, 0.9899804)
+  expected_out <- c(2.860657, 3.134838, 2.945104, 2.239138, 2.384578, 2.922436)
   
-  expect_equal(observed_out, expected_out, tolerance = 1e-07)
+  expect_equal(observed_out, expected_out, tolerance = 1e-06)
   
 })
 

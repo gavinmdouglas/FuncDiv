@@ -13,7 +13,7 @@ prep_func_contributor_dimnames <- function(abun_tab, func_tab) {
     .Call('_FuncDiv_prep_func_contributor_dimnames', PACKAGE = 'FuncDiv', abun_tab, func_tab)
 }
 
-par_unifrac <- function(sparseMatrix, tree, weighted) {
-    .Call('_FuncDiv_par_unifrac', PACKAGE = 'FuncDiv', sparseMatrix, tree, weighted)
+rbiom_par_unifrac <- function(sparseMatrix, tree, weighted) {
+    .Call('_FuncDiv_rbiom_par_unifrac', PACKAGE = 'FuncDiv', sparseMatrix, tree, weighted)
 }
 

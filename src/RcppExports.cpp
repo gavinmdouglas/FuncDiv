@@ -47,16 +47,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// par_unifrac
-NumericVector par_unifrac(List sparseMatrix, List tree, IntegerVector weighted);
-RcppExport SEXP _FuncDiv_par_unifrac(SEXP sparseMatrixSEXP, SEXP treeSEXP, SEXP weightedSEXP) {
+// rbiom_par_unifrac
+NumericVector rbiom_par_unifrac(List sparseMatrix, List tree, IntegerVector weighted);
+RcppExport SEXP _FuncDiv_rbiom_par_unifrac(SEXP sparseMatrixSEXP, SEXP treeSEXP, SEXP weightedSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< List >::type sparseMatrix(sparseMatrixSEXP);
     Rcpp::traits::input_parameter< List >::type tree(treeSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type weighted(weightedSEXP);
-    rcpp_result_gen = Rcpp::wrap(par_unifrac(sparseMatrix, tree, weighted));
+    rcpp_result_gen = Rcpp::wrap(rbiom_par_unifrac(sparseMatrix, tree, weighted));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -65,7 +65,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_FuncDiv_prep_all_sample_func_vec", (DL_FUNC) &_FuncDiv_prep_all_sample_func_vec, 2},
     {"_FuncDiv_prep_all_sample_func_taxa_vec", (DL_FUNC) &_FuncDiv_prep_all_sample_func_taxa_vec, 2},
     {"_FuncDiv_prep_func_contributor_dimnames", (DL_FUNC) &_FuncDiv_prep_func_contributor_dimnames, 2},
-    {"_FuncDiv_par_unifrac", (DL_FUNC) &_FuncDiv_par_unifrac, 3},
+    {"_FuncDiv_rbiom_par_unifrac", (DL_FUNC) &_FuncDiv_rbiom_par_unifrac, 3},
     {NULL, NULL, 0}
 };
 

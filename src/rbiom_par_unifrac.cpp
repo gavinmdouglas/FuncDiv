@@ -5,7 +5,11 @@
 using namespace Rcpp;
 using namespace RcppParallel;
 
-// This code was taken from rbiom 1.0.3 (https://cran.r-project.org/web/packages/rbiom/index.html)
+// This code was taken from rbiom 1.0.3
+// Source code: https://cran.r-project.org/web/packages/rbiom/index.html
+// It is distributed under a GNU Affero General Public License
+// (https://www.gnu.org/licenses/agpl-3.0.en.html)
+
 //======================================================
 // Parallel Task 1: Find the leaves under each node
 //======================================================
@@ -205,7 +209,7 @@ struct PairwiseDist : public Worker
 
 
 // [[Rcpp::export]]
-NumericVector par_unifrac(List sparseMatrix, List tree, IntegerVector weighted) {
+NumericVector rbiom_par_unifrac(List sparseMatrix, List tree, IntegerVector weighted) {
 
   //======================================================
   // Assumptions:

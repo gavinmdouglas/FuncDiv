@@ -1,3 +1,51 @@
+# Function to prep and compute UniFrac distances, forked from rbiom.
+unifrac_rbiom <- function(abun, phylo_in, weighted) {
+
+  # The below code (particularly the key call to "rbiom_par_unifrac") was taken
+  # from rbiom 1.0.3.
+  # Source code: https://cran.r-project.org/web/packages/rbiom/index.html
+  # It is distributed under a GNU Affero General Public License
+  # (https://www.gnu.org/licenses/agpl-3.0.en.html)
+
+  # Make sure the tree tips and the table row names are identical (and in order).
+  abun <- t(abun)
+  if (length(which(! phylo_in$tip.label %in% rownames(abun))) > 0) {
+    phylo_in <- ape::drop.tip(phy = phylo_in,
+                              tip = phylo_in$tip.label[which(! phylo_in$tip.label %in% rownames(abun))],
+                              trim.internal = TRUE)
+  }
+  abun <- abun[as.character(phylo_in$tip.label), ]
+
+  # Convert abundance table to triplet matrix format
+  # (in rbiom this was performed with the slam R package).
+  abun <- unclass(as.matrix(abun))
+  nonzero_indices <- which(is.na(abun) | (abun != 0), arr.ind = TRUE)
+  triplet_abun <- list(i = as.integer(nonzero_indices[, 1L]),
+                       j = as.integer(nonzero_indices[, 2L]),
+                       v = abun[nonzero_indices],
+                       nrow = as.integer(max(nonzero_indices[, 1L])),
+                       ncol = as.integer(max(nonzero_indices[, 2L])),
+                       dimnames = dimnames(abun))
+
+  # Order the sparse matrix's values by sample, then by taxa.
+  ord <- order(triplet_abun$j, triplet_abun$i)
+  triplet_abun$i <- triplet_abun$i[ord]
+  triplet_abun$j <- triplet_abun$j[ord]
+  triplet_abun$v <- triplet_abun$v[ord]
+
+  # Run C++ implemented dissimilarity algorithms multithreaded.R/beta_workflow.R
+
+  unifrac_out <- as.matrix(rbiom_par_unifrac(triplet_abun,
+                                             phylo_in,
+                                             ifelse(weighted, 1L, 0L)))
+
+  unifrac_out[lower.tri(unifrac_out, diag = TRUE)] <- NA
+
+  return(unifrac_out)
+
+}
+
+
 # Convenience object for programmatically computing beta diversity metrics.
 compute_betadiv <- list()
 
@@ -22,11 +70,11 @@ for (m in parDist_methods) {
 }
 
 compute_betadiv[["weighted_unifrac"]] <- function(in_tab, in_phylo) {
-  fast_weighted_UniFrac(in_tab, in_phylo)
+  unifrac_rbiom(in_tab, in_phylo, 'TRUE')
 }
 
 compute_betadiv[["unweighted_unifrac"]] <- function(in_tab, in_phylo) {
-  fast_unweighted_UniFrac(in_tab, in_phylo)
+  unifrac_rbiom(in_tab, in_phylo, 'FALSE')
 }
 
 compute_betadiv[["jensen_shannon_div"]] <- function(in_tab, ...) {
@@ -222,7 +270,11 @@ beta_div_contrib <- function(metrics = NULL,
     }
     
     if (! ape::is.rooted(in_tree)) {
-      stop("Stopping - rooted input tree required for UniFrac calculation.")
+      stop("Stopping - rooted input tree required for UniFrac calculations.")
+    }
+
+    if (! ape::is.binary(in_tree)) {
+      stop("Stopping - binary input tree required for UniFrac calculations.")
     }
     
   }
