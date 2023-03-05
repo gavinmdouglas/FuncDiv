@@ -29,10 +29,11 @@ richness <- function(x) {
   length(which(x > 0))
 }
 
-shannon_index <- function(x, log_base = 2) {
+shannon_index <- function(x) {
+  # Note that this is for log base 2.
   x <- x[which(x > 0)]
   x <- x / sum(x)
-  return(-1 * sum(x * log(x, log_base)))
+  return(-1 * sum(x * log(x, 2)))
 }
 
 berger_parker_dominance <- function(x) {
@@ -182,8 +183,8 @@ FuncDiv_alpha_metrics[["inverse_simpson_index"]] <- inverse_simpson_index
 #' 
 #' @param x input vector. Either class numeric (representing abundance of categories [e.g., microbes]) or character (indicating which taxa are present, which is required for `faiths_pd`). 
 #' @param metric alpha diversity metric to compute. Must be one of `names(FuncDiv_alpha_metrics)`.
-#' @param tree phylo object to use in case of `faiths_pd`. 
-#' 
+#' @param ... Included so that functions with single arguments will not throw errors if `tree` is included (and ignored). This should be a phylo object to use in case of `faiths_pd`. 
+#'
 #' @examples
 #' # Most metrics just require an input vector of abundances.
 #' test_abun <- c(0, NA, 1, 2, 10, 4)

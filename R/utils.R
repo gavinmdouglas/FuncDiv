@@ -3,11 +3,12 @@
 #' Converts from contributional-type table (i.e., a single, long table with joint taxa/function information) to separate taxa abundance and function copy number tables.
 #' 
 #' @param contrib_tab data.frame object containing combined taxa abundances and function copy numbers across taxa. Must contain columns corresponding to the sample ids, function ids, taxa ids, and taxa 
-#' abundances within samples. These column names are specified by the `samp_colname`, `func_colname`, `taxon_colname`, and `abun_colname`, respectively. 
+#' abundances within samples. These column names are specified by the `samp_colname`, `func_colname`, `taxon_colname`, `abun_colname`, and `copy.num_colname`, respectively. 
 #' @param samp_colname sample id column name of `contrib_tab` input data.frame.
 #' @param func_colname function id column name of `contrib_tab` input data.frame.
 #' @param taxon_colname taxon id column name of `contrib_tab` input data.frame.
 #' @param abun_colname taxonomic abundance (within each sample) column name of `contrib_tab` input data.frame.
+#' @param copy.num_colname function copy number column name of `contrib_tab` input data.frame.
 #' @export
 contrib_to_multitab <- function(contrib_tab,
                                 samp_colname = "sample",
@@ -55,7 +56,7 @@ contrib_to_multitab <- function(contrib_tab,
   duplicated_func_taxa_combos_i <- which(duplicated(contrib_tab_func_copy_num[, c(func_colname, taxon_colname)]))
   
   if (length(duplicated_func_taxa_combos_i) > 0) {
-    stopping("Stopping - at least one combination of taxa / functions has a different specificied copy number across samples. This can happen for instance if pathways levels per taxon are computed based on how much they contribute to the community-wide pathway abundance. This means that it is impossible to convert to the two table format.")
+    stopping("Stopping - at least one combination of taxa / functions has a different specificied copy number across samples. This can happen for instance if pathway levels per taxon are computed based on how much they contribute to the community-wide pathway abundance. This means that it is impossible to convert to the two table format.")
   }
   
   contrib_tab_func_copy_num_wide <- data.frame(data.table::dcast.data.table(data = data.table::data.table(contrib_tab_func_copy_num),
@@ -173,8 +174,8 @@ func_abun_crossproduct <- function(func_tab, abun_tab) {
 #' 
 #' The input tables will be returned except subset to the same taxa ids. Any functions and / or samples that are totally absent after this step will be dropped.
 #' 
-#' @param func_tab data.frame object containing function copy numbers, with rows as functions and columns as taxa.
-#' @param abun_tab data.frame object containing taxonomic abundances across samples, with rows as taxa and columns as samples.
+#' @param func_table data.frame object containing function copy numbers, with rows as functions and columns as taxa.
+#' @param abun_table data.frame object containing taxonomic abundances across samples, with rows as taxa and columns as samples.
 #' @param func_ids optional character vector of function ids to retain (all other rows of `func_tab` will be removed).
 #' 
 #' @export
