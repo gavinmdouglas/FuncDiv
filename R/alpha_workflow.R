@@ -66,7 +66,7 @@ alpha_div_contrib <- function(metrics,
                               taxon_colname = "taxon",
                               abun_colname = "taxon_abun") {
   
-  if (class(metrics) != "character") {
+  if (! inherits(metrics, "character")) {
     stop("Stopping - \"metrics\" input argument must be a character vector.")
   }
   
@@ -90,11 +90,11 @@ alpha_div_contrib <- function(metrics,
     
     workflow_type <- "multi_tab"
 
-    if (class(func_tab) != "data.frame") {
+    if (! inherits(func_tab, "data.frame")) {
       stop("Stopping - \"func_tab\" input argument must be a data.frame.")
     }
 
-    if (class(abun_tab) != "data.frame") {
+    if (! inherits(abun_tab, "data.frame")) {
       stop("Stopping - \"abun_tab\" input argument must be a data.frame.")
     }
 
@@ -102,7 +102,7 @@ alpha_div_contrib <- function(metrics,
 
     workflow_type <- "contrib_tab"
 
-    if (class(contrib_tab) != "data.frame") {
+    if (! inherits(contrib_tab, "data.frame")) {
       stop("Stopping - \"contrib_tab\" input argument must be a data.frame.")
     }
     
@@ -112,7 +112,7 @@ alpha_div_contrib <- function(metrics,
 
   }
 
-  if (class(replace_NA) != "logical" || length(replace_NA) != 1) {
+  if (! inherits(replace_NA, "logical") || length(replace_NA) != 1) {
     stop("Stopping - \"replace_NA\" input argument must be a logical vector of length one.")
   }
 
@@ -130,7 +130,7 @@ alpha_div_contrib <- function(metrics,
     
     metric_functions <- custom_metric_functions
     
-    if (class(custom_metric_functions) != "list") {
+    if (! inherits(custom_metric_functions, "list")) {
       stop("Stopping - \"custom_metric_functions\" argument must be a list (if specified).")
     } else if (length(which(! metrics %in% names(custom_metric_functions))) > 0) {
       stop("Stopping - the following specified metrics are not names in the list of custom metric functions that was input:\n   ",
@@ -141,7 +141,7 @@ alpha_div_contrib <- function(metrics,
   if ("faiths_pd" %in% metrics) {
     if (is.null(in_tree)) {
       stop("Stopping - a phylo (i.e., a tree) object must be passed to the \"in_tree\" argument to calculate faiths_pd.")
-    } else if (class(in_tree) != "phylo") {
+    } else if (! inherits(in_tree, "phylo")) {
       stop("Stopping - \"in_tree\" is not a phylo object.")
     } else if (is.null(in_tree$edge.length)) {
       stop("Stopping - no branch lengths in tree. faiths_pd will not be possible to compute.")

@@ -17,7 +17,7 @@ contrib_to_multitab <- function(contrib_tab,
                                 taxon_colname = "taxon",
                                 copy.num_colname = "genome_function_count") {
   
-  if (class(contrib_tab) != "data.frame") {
+  if (! inherits(contrib_tab, "data.frame")) {
     stop("Stopping - \"contrib_tab\" input argument must be a data.frame.")
   }
   
@@ -36,11 +36,11 @@ contrib_to_multitab <- function(contrib_tab,
   duplicated_sample_taxa_combos_i <- which(duplicated(contrib_taxa_abun[, c(samp_colname, taxon_colname)]))
   
   if (length(duplicated_sample_taxa_combos_i) > 0) {
-    stopping("Stopping - at least one combination of samples and taxa has a different specificied abundance across different functions. This could indicate an issue with the contributional format in the first place, and means that it is impossible to convert to the two table format.")
+    stop("Stopping - at least one combination of samples and taxa has a different specificied abundance across different functions. This could indicate an issue with the contributional format in the first place, and means that it is impossible to convert to the two table format.")
   }
   
   contrib_taxa_abun_wide <- data.frame(data.table::dcast.data.table(data = data.table::data.table(contrib_taxa_abun),
-                                                                    formula = as.formula(paste(taxon_colname, "~", samp_colname, sep = " ")),
+                                                                    formula = stats::as.formula(paste(taxon_colname, "~", samp_colname, sep = " ")),
                                                                     value.var = abun_colname), check.names = FALSE)
   
   rownames(contrib_taxa_abun_wide) <- as.character(contrib_taxa_abun_wide[, taxon_colname])
@@ -95,11 +95,11 @@ multitab_to_contrib <- function(func_tab,
                                 taxon_colname = "taxon",
                                 copy.num_colname = "genome_function_count") {
 
-  if (class(func_tab) != "data.frame") {
+  if (! inherits(func_tab, "data.frame")) {
     stop("Stopping - \"func_tab\" input argument must be a data.frame.")
   }
   
-  if (class(abun_tab) != "data.frame") {
+  if (! inherits(abun_tab, "data.frame")) {
     stop("Stopping - \"abun_tab\" input argument must be a data.frame.")
   }
   

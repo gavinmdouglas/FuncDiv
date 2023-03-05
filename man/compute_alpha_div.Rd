@@ -7,11 +7,11 @@
 compute_alpha_div(x, metric, ...)
 }
 \arguments{
-\item{x}{input vector. Either class numeric (representing abundance of categories \link{e.g., microbes}) or character (indicating which taxa are present, which is required for \code{faiths_pd}).}
+\item{x}{input vector. Either class numeric (representing abundance of categories [e.g., microbes]) or character (indicating which taxa are present, which is required for \code{faiths_pd}).}
 
 \item{metric}{alpha diversity metric to compute. Must be one of \code{names(FuncDiv_alpha_metrics)}.}
 
-\item{tree}{phylo object to use in case of \code{faiths_pd}.}
+\item{...}{Included so that functions with single arguments will not throw errors if \code{tree} is included (and ignored). This should be a phylo object to use in case of \code{faiths_pd}.}
 }
 \description{
 This is a simple wrapper for \code{FuncDiv_alpha_metrics}, and you can see more details with \code{?FuncDiv_alpha_metrics}.

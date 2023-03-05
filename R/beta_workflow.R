@@ -164,7 +164,7 @@ beta_div_contrib <- function(metrics = NULL,
     stop("Stopping - at least one metric must be specified.")  
   }
 
-  if (class(metrics) != "character") {
+  if (! inherits(metrics, "character")) {
     stop("Stopping - \"metrics\" input argument must be a character vector.")
   }
   
@@ -187,12 +187,12 @@ beta_div_contrib <- function(metrics = NULL,
   if (! is.null(func_tab) && ! is.null(abun_tab)) {
     
     workflow_type <- "multi_tab"
-    
-    if (class(func_tab) != "data.frame") {
+
+    if (! inherits(func_tab, "data.frame")) {
       stop("Stopping - \"func_tab\" input argument must be a data.frame.")
     }
     
-    if (class(abun_tab) != "data.frame") {
+    if (! inherits(abun_tab, "data.frame")) {
       stop("Stopping - \"abun_tab\" input argument must be a data.frame.")
     }
     
@@ -202,7 +202,7 @@ beta_div_contrib <- function(metrics = NULL,
     
     workflow_type <- "contrib_tab"
     
-    if (class(contrib_tab) != "data.frame") {
+    if (! inherits(contrib_tab, "data.frame")) {
       stop("Stopping - \"contrib_tab\" input argument must be a data.frame.")
     }
     
@@ -214,19 +214,19 @@ beta_div_contrib <- function(metrics = NULL,
     
   }
   
-  if (class(return_objects) != "logical" || length(return_objects) != 1) {
+  if (! inherits(return_objects, "logical") || length(return_objects) != 1) {
     stop("Stopping - \"return_objects\" input argument must be a logical vector of length one.")
   }
   
-  if (class(write_outfiles) != "logical" || length(write_outfiles) != 1) {
+  if (! inherits(write_outfiles, "logical") || length(write_outfiles) != 1) {
     stop("Stopping - \"write_outfiles\" input argument must be a logical vector of length one.")
   }
   
-  if (class(return_objects) != "logical" || length(return_objects) != 1) {
+  if (! inherits(return_objects, "logical") || length(return_objects) != 1) {
     stop("Stopping - \"return_objects\" input argument must be a logical vector of length one.")
   }
   
-  if ((class(ncores) != "numeric" && class(ncores) != "integer") && length(ncores) != 1) {
+  if ((! inherits(ncores, "numeric"))  && (! inherits(ncores, "integer")) && length(ncores) != 1) {
     stop("Stopping - \"ncores\" input argument must be an integer vector of length one.")
   } else {
    ncores <- as.integer(ncores) 
@@ -239,7 +239,7 @@ beta_div_contrib <- function(metrics = NULL,
   if (write_outfiles) {
     if (is.null(outdir)) {
       stop("Stopping - \"outdir\" argument needs to be specified when \"write_outfiles\" option specified.")
-    } else if (class(outdir) != "character" || length(outdir) != 1) {
+    } else if (! inherits(outdir, "character") || length(outdir) != 1) {
       stop("Stopping - \"outdir\" argument must be a character vector of length one (if specified).")
     } else if (dir.exists(outdir)) {
       stop("Stopping - specified output directory already exists and will not be overwritten. Please either delete this folder or specify a different folder name to be created.")
@@ -259,7 +259,7 @@ beta_div_contrib <- function(metrics = NULL,
   
   } else if (! is.null(func_ids)) {
     
-    if (class(func_ids) != "character") {
+    if (! inherits(func_ids, "character")) {
       stop("Stopping - \"func_ids\" input argument must either be NULL or a character vector.")
     }
     

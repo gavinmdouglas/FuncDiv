@@ -29,11 +29,10 @@ richness <- function(x) {
   length(which(x > 0))
 }
 
-shannon_index <- function(x) {
-  # Note that this is for log base 2.
+shannon_index <- function(x, log_base=2) {
   x <- x[which(x > 0)]
   x <- x / sum(x)
-  return(-1 * sum(x * log(x, 2)))
+  return(-1 * sum(x * log(x, log_base)))
 }
 
 berger_parker_dominance <- function(x) {
@@ -62,15 +61,15 @@ fishers_alpha <- function(x) {
   func2scan <- function(x, unique_obs, total_obs) { x * log(1 + total_obs / x) - unique_obs }
   
   options(warn = -1)
-  uniroot_out <- try(uniroot(func2scan,
-                             c(1, 50),
-                             extendInt = "upX",
-                             unique_obs = unique_obs, 
-                             total_obs = total_obs)$root,
-                    silent = TRUE)
+  uniroot_out <- try(stats::uniroot(func2scan,
+                                    c(1, 50),
+                                    extendInt = "upX",
+                                    unique_obs = unique_obs, 
+                                    total_obs = total_obs)$root,
+                     silent = TRUE)
   options(warn = 0)
   
-  if (class(uniroot_out) == "try-error") {
+  if (inherits(uniroot_out, "try-error")) {
     return(0)
   } else {
    return(uniroot_out)
@@ -181,7 +180,7 @@ FuncDiv_alpha_metrics[["inverse_simpson_index"]] <- inverse_simpson_index
 #' The exception is for `faiths_pd`, which expects a character vector of taxa labels that are present, as well as a tree (phylo object),
 #' which must contain all these specified taxa labels as tip labels.
 #' 
-#' @param x input vector. Either class numeric (representing abundance of categories [e.g., microbes]) or character (indicating which taxa are present, which is required for `faiths_pd`). 
+#' @param x input vector. Either class numeric (representing abundance of categories \[e.g., microbes\]) or character (indicating which taxa are present, which is required for `faiths_pd`). 
 #' @param metric alpha diversity metric to compute. Must be one of `names(FuncDiv_alpha_metrics)`.
 #' @param ... Included so that functions with single arguments will not throw errors if `tree` is included (and ignored). This should be a phylo object to use in case of `faiths_pd`. 
 #'

@@ -15,7 +15,7 @@ contrib_to_multitab(
 }
 \arguments{
 \item{contrib_tab}{data.frame object containing combined taxa abundances and function copy numbers across taxa. Must contain columns corresponding to the sample ids, function ids, taxa ids, and taxa
-abundances within samples. These column names are specified by the \code{samp_colname}, \code{func_colname}, \code{taxon_colname}, and \code{abun_colname}, respectively.}
+abundances within samples. These column names are specified by the \code{samp_colname}, \code{func_colname}, \code{taxon_colname}, \code{abun_colname}, and \code{copy.num_colname}, respectively.}
 
 \item{samp_colname}{sample id column name of \code{contrib_tab} input data.frame.}
 
@@ -24,6 +24,8 @@ abundances within samples. These column names are specified by the \code{samp_co
 \item{abun_colname}{taxonomic abundance (within each sample) column name of \code{contrib_tab} input data.frame.}
 
 \item{taxon_colname}{taxon id column name of \code{contrib_tab} input data.frame.}
+
+\item{copy.num_colname}{function copy number column name of \code{contrib_tab} input data.frame.}
 }
 \description{
 Converts from contributional-type table (i.e., a single, long table with joint taxa/function information) to separate taxa abundance and function copy number tables.

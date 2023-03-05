@@ -1,5 +1,5 @@
-Package: FuncDiv
-Title: Compute contributional diversity metrics
+DESCRIPTIONPackage: FuncDiv
+Title: Compute Contributional Diversity Metrics
 Version: 1.0.0
 Authors@R:
     person("Gavin", "Douglas", , "gavinmdouglas@gmail.com", role = c("aut", "cre"),
@@ -17,13 +17,11 @@ Depends:
 LinkingTo:
     Rcpp,
     RcppArmadillo,
-    RcppParallel,
-    RcppXPtrUtils
+    RcppParallel
 Imports:
     ape,
-    Rcpp,
     collapse,
-    data.table,
+    data.table
     parallel,
     parallelDist
 Suggests:

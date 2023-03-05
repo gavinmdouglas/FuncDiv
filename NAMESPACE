@@ -1,6 +1,11 @@
 useDynLib(FuncDiv)
 exportPattern("ˆ[[:alpha:]]+")
+import(RcppParallel)
+import(RcppArmadillo)
+import(RcppXPtrUtils)
+import(parallelDist)
 importFrom(Rcpp, evalCpp)
+importFrom(Rcpp, sourceCpp)
 
 export(FuncDiv_alpha_metrics)
 export(alpha_div_contrib)

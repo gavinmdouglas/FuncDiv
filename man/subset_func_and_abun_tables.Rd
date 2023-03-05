@@ -7,11 +7,11 @@
 subset_func_and_abun_tables(func_table, abun_table, func_ids = NULL)
 }
 \arguments{
+\item{func_table}{data.frame object containing function copy numbers, with rows as functions and columns as taxa.}
+
+\item{abun_table}{data.frame object containing taxonomic abundances across samples, with rows as taxa and columns as samples.}
+
 \item{func_ids}{optional character vector of function ids to retain (all other rows of \code{func_tab} will be removed).}
-
-\item{func_tab}{data.frame object containing function copy numbers, with rows as functions and columns as taxa.}
-
-\item{abun_tab}{data.frame object containing taxonomic abundances across samples, with rows as taxa and columns as samples.}
 }
 \description{
 The input tables will be returned except subset to the same taxa ids. Any functions and / or samples that are totally absent after this step will be dropped.
