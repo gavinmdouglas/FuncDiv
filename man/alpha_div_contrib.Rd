@@ -46,6 +46,10 @@ least the names indicated by the \code{metrics} parameter.}
 
 \item{abun_colname}{taxonomic abundance (within each sample) column name of \code{contrib_tab} input data.frame.}
 }
+\value{
+A List, containing one dataframe for each specified alpha diversity metric.
+In each dataframe, rows are functions and samples are columns.
+}
 \description{
 Based on joint taxa-function input data (i.e., contributional data), a dataframe
 will be returned for each specified metric, which will contain the metric values for all function and sample combinations.
@@ -57,4 +61,29 @@ can be specified with the \code{custom_metric_functions} parameter.
 
 Note that the taxonomic abundances can be relative abundance, read counts, or transformed in another way. However, note that some default metrics
 are only compatible with count data (see \code{?FuncDiv_alpha_metrics}).
+}
+\examples{
+# First, simulate some (non-realistic) data.
+set.seed(123)
+test_tree <- ape::rtree(100)
+test_abun <- data.frame(matrix(rnorm(500), nrow = 100, ncol = 5))
+rownames(test_abun) <- test_tree$tip.label
+colnames(test_abun) <- c("sample1", "sample2", "sample3", "sample4", "sample5")
+test_abun[test_abun < 0] <- 0
+test_func <- data.frame(matrix(sample(c(0L, 1L), 200, replace = TRUE),
+                               nrow = 2, ncol = 100))
+colnames(test_func) <- test_tree$tip.label
+rownames(test_func) <- c("func1", "func2")
+
+# Compute alpha diversity, based on (observed) richness, Faith's phylogenetic
+# diversity, and the Gini-Simpson Index.
+contrib_alpha <- alpha_div_contrib(metrics = c("richness",  "faiths_pd", "gini_simpson_index"),
+                                   func_tab = test_func,
+                                   abun_tab = test_abun,
+                                   in_tree = test_tree,
+                                   ncores = 1)
+
+# Print out computed Gini-Simpson Index values.
+contrib_alpha$gini_simpson_index
+
 }

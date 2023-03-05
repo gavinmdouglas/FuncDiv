@@ -110,6 +110,40 @@ compute_betadiv[["jensen_shannon_div"]] <- function(in_tab, ...) {
 #' @param taxon_colname taxon id column name of `contrib_tab` input data.frame.
 #' @param abun_colname taxonomic abundance (within each sample) column name of `contrib_tab` input data.frame.
 #'
+#' @return Differs depending on the `return_objects` and `write_outfiles` parameters.
+#'
+#' If `return_objects = TRUE`, then a nested List will be returned.
+#' Each specific beta diversity metric will be the first level, and the functions are the second level
+#' (e.g., contrib_beta$binary$func2).
+#'
+#' If `write_outfiles` then a character vector will be returned, indicating where the output tables were written.
+#'
+#' @examples
+#' # First, simulate some (non-realistic) data.
+#' set.seed(123)
+#' test_tree <- ape::rtree(100)
+#' test_abun <- data.frame(matrix(rnorm(500), nrow = 100, ncol = 5))
+#' rownames(test_abun) <- test_tree$tip.label
+#' colnames(test_abun) <- c("sample1", "sample2", "sample3", "sample4", "sample5")
+#' test_abun[test_abun < 0] <- 0
+#' test_func <- data.frame(matrix(sample(c(0L, 1L), 200, replace = TRUE),
+#'                                nrow = 2, ncol = 100))
+#' colnames(test_func) <- test_tree$tip.label
+#' rownames(test_func) <- c("func1", "func2")
+#'
+#' # Compute beta diversity, based on Weighted UniFrac and Jaccard distances
+#' # (i.e., "binary").
+#' contrib_beta <- beta_div_contrib(metrics = c("weighted_unifrac", "binary"),
+#'                                  func_tab = test_func,
+#'                                  abun_tab = test_abun,
+#'                                  in_tree = test_tree,
+#'                                  return_objects = TRUE,
+#'                                  ncores = 1)
+#'
+#' # Parse beta diversity distance list value for a specific function (func2) and
+#' # distance metric (Jaccard).
+#' contrib_beta$binary$func2
+#'
 #' @export
 beta_div_contrib <- function(metrics = NULL,
                              func_tab = NULL,
