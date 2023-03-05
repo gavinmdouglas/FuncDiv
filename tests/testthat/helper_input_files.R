@@ -55,6 +55,19 @@ non_relabun_metrics <- c("menhinicks_richness", "mcintoshs_evenness", "mcintoshs
 
 
 # Additional beta workflow test objects.
+func_tab_num.added <- func_tab
+rownames(func_tab_num.added) <- paste("111", rownames(func_tab_num.added), sep = "")
+colnames(func_tab_num.added) <- paste("111", colnames(func_tab_num.added), sep = "")
+
+abun_tab_num.added <- abun_tab
+rownames(abun_tab_num.added) <- paste("111", rownames(abun_tab_num.added), sep = "")
+colnames(abun_tab_num.added) <- paste("111", colnames(abun_tab_num.added), sep = "")
+
+contrib_tab_num.added <- contrib_tab
+contrib_tab_num.added$samp <- paste("111", contrib_tab_num.added$samp, sep = "")
+contrib_tab_num.added$func <- paste("111", contrib_tab_num.added$func, sep = "")
+contrib_tab_num.added$tax <- paste("111", contrib_tab_num.added$tax, sep = "")
+
 parDist_methods_test_set <- c("bhjattacharyya", "bray", "canberra", "chord", 
                               "divergence", "dtw", "euclidean", "fJaccard", "geodesic", 
                               "hellinger", "kullback",  "manhattan", 
@@ -64,3 +77,11 @@ parDist_methods_test_set <- c("bhjattacharyya", "bray", "canberra", "chord",
                               "mountford", "mozley", "ochiai", "phi", "russel", "simple matching", 
                               "simpson", "stiles", "tanimoto", "yule", "yule2", "cosine", "hamming")
 # Note: excluded mahalanobis as it caused this error: "inv(): matrix is singular"
+
+
+# Then for utils tests (note that this table is ordered differently than above).
+contrib_tab_ordered <- contrib_tab[order(contrib_tab$samp, contrib_tab$func, contrib_tab$tax), ]
+contrib_tab_ordered_num.added <- contrib_tab_ordered
+contrib_tab_ordered_num.added$samp <- paste("111", contrib_tab_ordered_num.added$samp, sep = "")
+contrib_tab_ordered_num.added$func <- paste("111", contrib_tab_ordered_num.added$func, sep = "")
+contrib_tab_ordered_num.added$tax <- paste("111", contrib_tab_ordered_num.added$tax, sep = "")

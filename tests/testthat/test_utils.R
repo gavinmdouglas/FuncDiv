@@ -2,7 +2,7 @@
 
 test_that("converting from contributional to multi-table format works as expected.", {
 
-  multi_tab <- contrib_to_multitab(contrib_tab = contrib_tab,
+  multi_tab <- contrib_to_multitab(contrib_tab = contrib_tab_ordered,
                                    samp_colname = "samp",
                                    func_colname = "func",
                                    taxon_colname = "tax",
@@ -36,7 +36,7 @@ test_that("converting from multi-table to contributional format works as expecte
   
   contrib_formatted <- contrib_formatted[order(contrib_formatted$samp, contrib_formatted$func, contrib_formatted$tax), ]
   
-  expect_equal(contrib_formatted, contrib_tab)
+  expect_equal(contrib_formatted, contrib_tab_ordered)
   
 })
 
@@ -45,7 +45,7 @@ test_that("converting from multi-table to contributional format works as expecte
 
 test_that("converting from contributional to multi-table format works as expected, even with taxa/samples/functions with numbers at start.", {
   
-  multi_tab <- contrib_to_multitab(contrib_tab = contrib_tab_num.added,
+  multi_tab <- contrib_to_multitab(contrib_tab = contrib_tab_ordered_num.added,
                                    samp_colname = "samp",
                                    func_colname = "func",
                                    taxon_colname = "tax",
@@ -88,7 +88,7 @@ test_that("converting from multi-table to contributional format works as expecte
   
   contrib_formatted <- contrib_formatted[order(contrib_formatted$samp, contrib_formatted$func, contrib_formatted$tax), ]
   
-  expect_equal(contrib_formatted, contrib_tab)
+  expect_equal(contrib_formatted, contrib_tab_ordered)
   
 })
 
