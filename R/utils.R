@@ -56,11 +56,11 @@ contrib_to_multitab <- function(contrib_tab,
   duplicated_func_taxa_combos_i <- which(duplicated(contrib_tab_func_copy_num[, c(func_colname, taxon_colname)]))
   
   if (length(duplicated_func_taxa_combos_i) > 0) {
-    stopping("Stopping - at least one combination of taxa / functions has a different specificied copy number across samples. This can happen for instance if pathway levels per taxon are computed based on how much they contribute to the community-wide pathway abundance. This means that it is impossible to convert to the two table format.")
+    stop("Stopping - at least one combination of taxa / functions has a different specificied copy number across samples. This can happen for instance if pathway levels per taxon are computed based on how much they contribute to the community-wide pathway abundance. This means that it is impossible to convert to the two table format.")
   }
   
   contrib_tab_func_copy_num_wide <- data.frame(data.table::dcast.data.table(data = data.table::data.table(contrib_tab_func_copy_num),
-                                                                            formula = as.formula(paste(func_colname, "~", taxon_colname, sep = " ")),
+                                                                            formula = stats::as.formula(paste(func_colname, "~", taxon_colname, sep = " ")),
                                                                             value.var = copy.num_colname), check.names = FALSE)
   
   rownames(contrib_tab_func_copy_num_wide) <- as.character(contrib_tab_func_copy_num_wide[, func_colname])
