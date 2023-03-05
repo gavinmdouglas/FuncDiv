@@ -4,41 +4,6 @@
 
 # Make sure that expected errors are returned under expected conditions as well.
 
-library(FuncDiv)
-
-# Read in test input files.
-contrib_tab <- read.table("../../example_files/contrib_input.tsv.gz",
-                          sep = "\t", header = TRUE, stringsAsFactors = FALSE, quote = "", comment.char = "")
-
-func_tab <- read.table("../../example_files/func_input.tsv.gz", header = TRUE, sep = "\t", row.names = 1, check.names = FALSE)
-
-abun_tab <- read.table("../../example_files/taxa_input.tsv.gz", header = TRUE, sep = "\t", row.names = 1)
-
-test_tree <- ape::read.tree("../../example_files/taxa.tree")
-
-func_tab_num.added <- func_tab
-rownames(func_tab_num.added) <- paste("111", rownames(func_tab_num.added), sep = "")
-colnames(func_tab_num.added) <- paste("111", colnames(func_tab_num.added), sep = "")
-
-abun_tab_num.added <- abun_tab
-rownames(abun_tab_num.added) <- paste("111", rownames(abun_tab_num.added), sep = "")
-colnames(abun_tab_num.added) <- paste("111", colnames(abun_tab_num.added), sep = "")
-
-contrib_tab_num.added <- contrib_tab
-contrib_tab_num.added$samp <- paste("111", contrib_tab_num.added$samp, sep = "")
-contrib_tab_num.added$func <- paste("111", contrib_tab_num.added$func, sep = "")
-contrib_tab_num.added$tax <- paste("111", contrib_tab_num.added$tax, sep = "")
-
-parDist_methods_test_set <- c("bhjattacharyya", "bray", "canberra", "chord", 
-                               "divergence", "dtw", "euclidean", "fJaccard", "geodesic", 
-                               "hellinger", "kullback",  "manhattan", 
-                               "maximum", "minkowski", "podani", "soergel", "wave", 
-                               "whittaker", "binary", "braun-blanquet", "dice", "fager", 
-                               "faith", "hamman", "kulczynski1", "kulczynski2", "michael", 
-                               "mountford", "mozley", "ochiai", "phi", "russel", "simple matching", 
-                               "simpson", "stiles", "tanimoto", "yule", "yule2", "cosine", "hamming")
-# Note: excluded mahalanobis as it caused this error: "inv(): matrix is singular"
-
 test_that("beta_div_contrib returns same values no matter the input table type.", {
   
   multitab_out <- beta_div_contrib(metrics = parDist_methods_test_set,
