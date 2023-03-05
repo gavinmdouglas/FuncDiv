@@ -143,6 +143,8 @@ inverse_simpson_index <- function(x) {
 #' corresponding to the number of occurrences of each category (e.g., each microbe): `menhinicks_richness`, `mcintoshs_evenness`, `mcintoshs_dominance`,
 #' `margalefs_richness`, and `fishers_alpha`.
 #' 
+#' @return Numeric vector with alpha diversity value.
+#'
 #' @examples
 #' # Most metrics just require an input vector of abundances.
 #' test_abun <- c(0, NA, 1, 2, 10, 4)
@@ -183,6 +185,8 @@ FuncDiv_alpha_metrics[["inverse_simpson_index"]] <- inverse_simpson_index
 #' @param x input vector. Either class numeric (representing abundance of categories \[e.g., microbes\]) or character (indicating which taxa are present, which is required for `faiths_pd`). 
 #' @param metric alpha diversity metric to compute. Must be one of `names(FuncDiv_alpha_metrics)`.
 #' @param ... Included so that functions with single arguments will not throw errors if `tree` is included (and ignored). This should be a phylo object to use in case of `faiths_pd`. 
+#'
+#' @return Numeric vector with alpha diversity value.
 #'
 #' @examples
 #' # Most metrics just require an input vector of abundances.

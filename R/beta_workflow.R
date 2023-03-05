@@ -77,14 +77,6 @@ compute_betadiv[["unweighted_unifrac"]] <- function(in_tab, in_phylo) {
   unifrac_rbiom(in_tab, in_phylo, 'FALSE')
 }
 
-compute_betadiv[["jensen_shannon_div"]] <- function(in_tab, ...) {
-  func_dist <- as.matrix(parallelDist::parDist(in_tab, method = "custom",
-                                               func = create_jensen_shannon_divergence_FuncPtr(),
-                                               threads = 1))
-  func_dist[lower.tri(func_dist, diag = TRUE)] <- NA
-  return(func_dist)
-}
-
 #' Main function for computing contributional **beta** diversity
 #' 
 #' Based on joint taxa-function input data (i.e., contributional data), the beta diversity (i.e., inter-sample distance or divergence)
@@ -313,6 +305,20 @@ beta_div_contrib <- function(metrics = NULL,
       stop("Stopping - binary input tree required for UniFrac calculations.")
     }
     
+  }
+  
+  # If Jensen-Shannon divergence specified, then define pointer to the Rcpp
+  # code to compute this with ParallelDist.
+  if ("jensen_shannon_div" %in% metrics) {
+    jensen_shannon_pointer <- create_jensen_shannon_divergence_FuncPtr()
+    compute_betadiv[["jensen_shannon_div"]] <- function(in_tab, ...) {
+      func_dist <- as.matrix(parallelDist::parDist(in_tab,
+                                                   method = "custom",
+                                                   func = jensen_shannon_pointer,
+                                                   threads = 1))
+      func_dist[lower.tri(func_dist, diag = TRUE)] <- NA
+      return(func_dist)
+    }
   }
   
   if (workflow_type == "multi_tab") {

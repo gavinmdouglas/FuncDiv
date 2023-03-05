@@ -27,6 +27,9 @@ abundances within samples. These column names are specified by the \code{samp_co
 
 \item{copy.num_colname}{function copy number column name of \code{contrib_tab} input data.frame.}
 }
+\value{
+List with taxon abundance (\code{taxon_abun}) and function copy number (\code{function_copy_num}) dataframes as separate elements.
+}
 \description{
 Converts from contributional-type table (i.e., a single, long table with joint taxa/function information) to separate taxa abundance and function copy number tables.
 }

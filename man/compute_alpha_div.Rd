@@ -13,6 +13,9 @@ compute_alpha_div(x, metric, ...)
 
 \item{...}{Included so that functions with single arguments will not throw errors if \code{tree} is included (and ignored). This should be a phylo object to use in case of \code{faiths_pd}.}
 }
+\value{
+Numeric vector with alpha diversity value.
+}
 \description{
 This is a simple wrapper for \code{FuncDiv_alpha_metrics}, and you can see more details with \code{?FuncDiv_alpha_metrics}.
 }

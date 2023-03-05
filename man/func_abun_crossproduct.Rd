@@ -11,8 +11,10 @@ func_abun_crossproduct(func_tab, abun_tab)
 
 \item{abun_tab}{data.frame object containing taxonomic abundances across samples, with rows as taxa and columns as samples.}
 }
+\value{
+Dataframe representing the \emph{unnormalized} community-wide abundances of functions across samples.
+}
 \description{
 Takes in table of function copy numbers across taxa and table of taxa abundances across samples.
-Returns a new table representing the \emph{unnormalized} community-wide abundances of functions across samples.
 I.e., it represents the multiplication of the function copy numbers by the abundances of the taxa within each sample.
 }

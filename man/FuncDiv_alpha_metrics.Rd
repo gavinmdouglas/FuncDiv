@@ -10,6 +10,9 @@ An object of class \code{list} of length 15.
 \usage{
 FuncDiv_alpha_metrics
 }
+\value{
+Numeric vector with alpha diversity value.
+}
 \description{
 These functions are used by the \code{alpha_div_contrib} function to compute contributional diversity,
 but can be used for any arbitrary input vector as well to compute standard alpha diversity.
