@@ -78,7 +78,9 @@ compute_betadiv[["unweighted_unifrac"]] <- function(in_tab, in_phylo) {
 }
 
 compute_betadiv[["jensen_shannon_div"]] <- function(in_tab, ...) {
-  func_dist <- as.matrix(parallelDist::parDist(in_tab, method = "custom", func = jensen_shannon_divergence_FuncPtr, threads = 1))
+  func_dist <- as.matrix(parallelDist::parDist(in_tab, method = "custom",
+                                               func = create_jensen_shannon_divergence_FuncPtr(),
+                                               threads = 1))
   func_dist[lower.tri(func_dist, diag = TRUE)] <- NA
   return(func_dist)
 }

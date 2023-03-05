@@ -14,7 +14,6 @@ License: AGPL-3
 Depends:
     R (>= 2.10),
     Rcpp,
-    RcppArmadillo,
     RcppParallel,
     RcppXPtrUtils
 Imports:
