@@ -1,0 +1,25 @@
+#' Function to create Rcpp pointer for Jensen-Shannon divergence function
+#'
+#' @description
+#' ParallelDist can take custom distance metrics in as Rcpp pointers. However,
+#' this was causing issues when defined as a normal R object in the FuncDiv
+#' package, so instead, the pointer will be created as needed internally with
+#' this packaged function.
+#' 
+#' This also serves as an example of how one can specify other custom pointer
+#' functions to compute beta diversity.
+#'
+#' @format ## `create_jensen_shannon_divergence_FuncPtr`
+#' Function that executes the below code and a returns a RcppXPtrUtils::cppXPtr pointer:\cr
+#' \cr
+#' RcppXPtrUtils::cppXPtr(\cr
+#'  "double customDist(const arma::mat &A, const arma::mat &B) {\cr
+#'      arma::mat p = A / arma::accu(A);\cr
+#'      arma::mat q = B / arma::accu(B);\cr
+#'      arma::mat m = (p + q) * 0.5;\cr
+#'      double result = 0.5 * arma::accu(p * arma::log(p / m).t()) + 0.5 * arma::accu(q * arma::log(q / m).t());\cr
+#'      return std::isinf(result) ? std::numeric_limits<double>::quiet_NaN()\cr
+#'      : result;\cr
+#'  }", depends = c("RcppArmadillo"))\cr
+#' \cr
+"create_jensen_shannon_divergence_FuncPtr"
