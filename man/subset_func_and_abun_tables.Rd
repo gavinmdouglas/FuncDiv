@@ -14,7 +14,7 @@ subset_func_and_abun_tables(func_table, abun_table, func_ids = NULL)
 \item{func_ids}{optional character vector of function ids to retain (all other rows of \code{func_tab} will be removed).}
 }
 \value{
-List containing subsetted function and abundance dataframes as separate elements.
+list containing subsetted function and abundance data.frames as separate elements.
 }
 \description{
 The input tables will be returned except subset to the same taxa ids. Any functions and / or samples that are totally absent after this step will be dropped.

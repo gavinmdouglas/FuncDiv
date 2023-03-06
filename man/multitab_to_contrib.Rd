@@ -33,7 +33,7 @@ multitab_to_contrib(
 \item{copy.num_colname}{function copy number (within each taxa) column name of \code{contrib_tab} output data.frame.}
 }
 \value{
-Dataframe in contributional format (i.e., single, long-format version of both input tables).
+data.frame in contributional format (i.e., single, long-format version of both input tables).
 }
 \description{
 Converts from separate taxa abundance and function copy number table input style to contributional-type table (i.e., a single, long table with joint taxa/function information).

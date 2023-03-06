@@ -11,7 +11,7 @@ An object of class \code{list} of length 15.
 FuncDiv_alpha_metrics
 }
 \value{
-Numeric vector with alpha diversity value.
+numeric vector with alpha diversity value.
 }
 \description{
 These functions are used by the \code{alpha_div_contrib} function to compute contributional diversity,

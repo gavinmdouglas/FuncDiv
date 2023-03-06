@@ -31,7 +31,7 @@ beta_div_contrib(
 \item{contrib_tab}{data.frame object containing combined taxa abundances and function copy numbers across taxa. Must contain columns corresponding to the sample ids, function ids, taxa ids, and taxa
 abundances within samples. These column names are specified by the \code{samp_colname}, \code{func_colname}, \code{taxon_colname}, and \code{abun_colname}, respectively.Mutually exclusive with \code{abun_tab} and \code{func_tab}.}
 
-\item{in_tree}{Phylo object to use if \code{weighted_unifrac} or \code{unweighted_unifrac} are specified.}
+\item{in_tree}{phylo object to use if \code{weighted_unifrac} or \code{unweighted_unifrac} are specified.}
 
 \item{func_ids}{character vector specifying subset of function ids to include for analysis. Will analyze all functions present if this is not specified.}
 
@@ -52,7 +52,7 @@ abundances within samples. These column names are specified by the \code{samp_co
 \item{abun_colname}{taxonomic abundance (within each sample) column name of \code{contrib_tab} input data.frame.}
 }
 \value{
-Differs depending on the \code{return_objects} and \code{write_outfiles} parameters.
+differs depending on the \code{return_objects} and \code{write_outfiles} parameters.
 
 If \code{return_objects = TRUE}, then a nested List will be returned.
 Each specific beta diversity metric will be the first level, and the functions are the second level
