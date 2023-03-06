@@ -1,26 +1,25 @@
 faiths_pd <- function(tips_in_sample, tree) {
-  
+
   # Simplified version of equivalent functions from picante.
   # Requires tree to be rooted and will only compute distances
   # based on edges in tree after pruning to tips in samples
   # (i.e., distance to overall root is not included).
-  
-  
+
   # NOTE: Since this function is expected to be run with many different input vectors and the same tree,
   # this function does not perform checks on the input tree itself!
-  
+
   if (length(tips_in_sample) == 1) { return(0) }
-  
+
   if (length(which(! tips_in_sample %in% tree$tip.label) > 0)) {
      stop("Stopping - some features in sample are not found as tips in the tree.")
   }
-  
+
   if (length(which(! tree$tip.label %in% tips_in_sample) > 0)) {
     tree <- ape::drop.tip(phy = tree,
                           tip = tree$tip.label[which(! tree$tip.label %in% tips_in_sample)],
                           trim.internal = TRUE)
   }
-  
+
   return(sum(tree$edge.length))
 
 }
@@ -45,21 +44,21 @@ ENS_pie <- function(x) {
 }
 
 fishers_alpha <- function(x) {
-  
+
   # Simplified version of function implemented in vegan.
   # Returns 0 if fit cannot be performed
   # (which is assumed to always be the case when there are
   # fewer than three unique observations).
-  
+
   x <- x[which(x > 0)]
-  
+
   if (length(x) < 3) { return(0) }
-  
+
   unique_obs <- length(x)
   total_obs <- sum(x)
-  
+
   func2scan <- function(x, unique_obs, total_obs) { x * log(1 + total_obs / x) - unique_obs }
-  
+
   options(warn = -1)
   uniroot_out <- try(stats::uniroot(func2scan,
                                     c(1, 50),
@@ -68,7 +67,7 @@ fishers_alpha <- function(x) {
                                     total_obs = total_obs)$root,
                      silent = TRUE)
   options(warn = 0)
-  
+
   if (inherits(uniroot_out, "try-error")) {
     return(0)
   } else {
@@ -143,7 +142,7 @@ inverse_simpson_index <- function(x) {
 #' corresponding to the number of occurrences of each category (e.g., each microbe): `menhinicks_richness`, `mcintoshs_evenness`, `mcintoshs_dominance`,
 #' `margalefs_richness`, and `fishers_alpha`.
 #' 
-#' @return Numeric vector with alpha diversity value.
+#' @return numeric vector with alpha diversity value.
 #'
 #' @examples
 #' # Most metrics just require an input vector of abundances.
@@ -184,9 +183,9 @@ FuncDiv_alpha_metrics[["inverse_simpson_index"]] <- inverse_simpson_index
 #' 
 #' @param x input vector. Either class numeric (representing abundance of categories \[e.g., microbes\]) or character (indicating which taxa are present, which is required for `faiths_pd`). 
 #' @param metric alpha diversity metric to compute. Must be one of `names(FuncDiv_alpha_metrics)`.
-#' @param ... Included so that functions with single arguments will not throw errors if `tree` is included (and ignored). This should be a phylo object to use in case of `faiths_pd`. 
+#' @param ... included so that functions with single arguments will not throw errors if `tree` is included (and ignored). This should be a phylo object to use in case of `faiths_pd`. 
 #'
-#' @return Numeric vector with alpha diversity value.
+#' @return numeric vector with alpha diversity value.
 #'
 #' @examples
 #' # Most metrics just require an input vector of abundances.

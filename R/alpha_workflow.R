@@ -15,7 +15,7 @@
 #' @param abun_tab data.frame object containing taxonomic abundances across samples, with rows as taxa and columns as samples. Required if `func_tab` is specified, and is mutually exclusive with `contrib_tab`.
 #' @param contrib_tab data.frame object containing combined taxa abundances and function copy numbers across taxa. Must contain columns corresponding to the sample ids, function ids, taxa ids, and taxa 
 #' abundances within samples. These column names are specified by the `samp_colname`, `func_colname`, `taxon_colname`, and `abun_colname`, respectively. Mutually exclusive with `abun_tab` and `func_tab`. 
-#' @param in_tree Phylo object to use if `faiths_pd` is specified.
+#' @param in_tree phylo object to use if `faiths_pd` is specified.
 #' @param ncores integer indicating number of cores to use for parallelizable steps.
 #' @param replace_NA Boolean vector of length one, indicating whether all NA's in the output of all metrics should be converted to 0's. Note that this done automatically done for `richness` either way.
 #' @param custom_metric_functions List object containing custom alpha diversity metric functions. This overrides `FuncDiv_alpha_metrics` when specified. The list element names must correspond to at
@@ -25,7 +25,7 @@
 #' @param taxon_colname taxon id column name of `contrib_tab` input data.frame.
 #' @param abun_colname taxonomic abundance (within each sample) column name of `contrib_tab` input data.frame.
 #'
-#' @return A List, containing one dataframe for each specified alpha diversity metric.
+#' @return a list, containing one dataframe for each specified alpha diversity metric.
 #' In each dataframe, rows are functions and samples are columns.
 #'
 #' @examples

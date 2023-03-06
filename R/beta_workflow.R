@@ -1,4 +1,4 @@
-# Function to prep and compute UniFrac distances, forked from rbiom.
+
 unifrac_rbiom <- function(abun, phylo_in, weighted) {
 
   # The below code (particularly the key call to "rbiom_par_unifrac") was taken
@@ -34,7 +34,6 @@ unifrac_rbiom <- function(abun, phylo_in, weighted) {
   triplet_abun$v <- triplet_abun$v[ord]
 
   # Run C++ implemented dissimilarity algorithms multithreaded.R/beta_workflow.R
-
   unifrac_out <- as.matrix(rbiom_par_unifrac(triplet_abun,
                                              phylo_in,
                                              ifelse(weighted, 1L, 0L)))
@@ -58,7 +57,6 @@ parDist_methods <- c("bhjattacharyya", "bray", "canberra", "chord",
                      "mountford", "mozley", "ochiai", "phi", "russel", "simple matching", 
                      "simpson", "stiles", "tanimoto", "yule", "yule2", "cosine", "hamming")
 
-
 for (m in parDist_methods) {
   func_dist_cmd_char <- paste("function(in_tab, ...) {\n",
                               "func_dist <- as.matrix(parallelDist::parDist(in_tab, method = \"", eval(m), "\", threads = 1))\n",
@@ -66,7 +64,7 @@ for (m in parDist_methods) {
                               "return(func_dist)\n}", sep = "")
   
   compute_betadiv[[m]] <- eval(parse(text = func_dist_cmd_char))
-    
+
 }
 
 compute_betadiv[["weighted_unifrac"]] <- function(in_tab, in_phylo) {
@@ -93,7 +91,7 @@ compute_betadiv[["unweighted_unifrac"]] <- function(in_tab, in_phylo) {
 #' @param abun_tab data.frame object containing taxonomic abundances across samples, with rows as taxa and columns as samples. Required if `func_tab` is specified, and is mutually exclusive with `contrib_tab`.
 #' @param contrib_tab data.frame object containing combined taxa abundances and function copy numbers across taxa. Must contain columns corresponding to the sample ids, function ids, taxa ids, and taxa 
 #' abundances within samples. These column names are specified by the `samp_colname`, `func_colname`, `taxon_colname`, and `abun_colname`, respectively.Mutually exclusive with `abun_tab` and `func_tab`. 
-#' @param in_tree Phylo object to use if `weighted_unifrac` or `unweighted_unifrac` are specified.
+#' @param in_tree phylo object to use if `weighted_unifrac` or `unweighted_unifrac` are specified.
 #' @param func_ids character vector specifying subset of function ids to include for analysis. Will analyze all functions present if this is not specified.
 #' @param return_objects Boolean vector of length one, specifying whether function should return a list of all output distance tables (nested by metric name, and then by function id). Incompatible with `write_outfiles`.
 #' @param write_outfiles Boolean vector of length one, specifying whether function write all distance tables to plain-text files in the specified `outdir` location. Incompatible with `return_objects`.
@@ -104,7 +102,7 @@ compute_betadiv[["unweighted_unifrac"]] <- function(in_tab, in_phylo) {
 #' @param taxon_colname taxon id column name of `contrib_tab` input data.frame.
 #' @param abun_colname taxonomic abundance (within each sample) column name of `contrib_tab` input data.frame.
 #'
-#' @return Differs depending on the `return_objects` and `write_outfiles` parameters.
+#' @return differs depending on the `return_objects` and `write_outfiles` parameters.
 #'
 #' If `return_objects = TRUE`, then a nested List will be returned.
 #' Each specific beta diversity metric will be the first level, and the functions are the second level

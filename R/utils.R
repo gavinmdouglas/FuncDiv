@@ -10,7 +10,7 @@
 #' @param abun_colname taxonomic abundance (within each sample) column name of `contrib_tab` input data.frame.
 #' @param copy.num_colname function copy number column name of `contrib_tab` input data.frame.
 #'
-#' @return List with taxon abundance (`taxon_abun`) and function copy number (`function_copy_num`) dataframes as separate elements.
+#' @return list with taxon abundance (`taxon_abun`) and function copy number (`function_copy_num`) data.frames as separate elements.
 #'
 #' @export
 contrib_to_multitab <- function(contrib_tab,
@@ -88,7 +88,7 @@ contrib_to_multitab <- function(contrib_tab,
 #' @param abun_colname taxonomic abundance (within each sample) column name of `contrib_tab` output data.frame.
 #' @param copy.num_colname function copy number (within each taxa) column name of `contrib_tab` output data.frame.
 #'
-#' @return Dataframe in contributional format (i.e., single, long-format version of both input tables).
+#' @return data.frame in contributional format (i.e., single, long-format version of both input tables).
 #'
 #' @export
 multitab_to_contrib <- function(func_tab,
@@ -159,7 +159,7 @@ multitab_to_contrib <- function(func_tab,
 #' @param func_tab data.frame object containing function copy numbers, with rows as functions and columns as taxa.
 #' @param abun_tab data.frame object containing taxonomic abundances across samples, with rows as taxa and columns as samples.
 #'
-#' @return Dataframe representing the *unnormalized* community-wide abundances of functions across samples.
+#' @return data.frame representing the *unnormalized* community-wide abundances of functions across samples.
 #'
 #' @export
 func_abun_crossproduct <- function(func_tab, abun_tab) {
@@ -184,7 +184,7 @@ func_abun_crossproduct <- function(func_tab, abun_tab) {
 #' @param abun_table data.frame object containing taxonomic abundances across samples, with rows as taxa and columns as samples.
 #' @param func_ids optional character vector of function ids to retain (all other rows of `func_tab` will be removed).
 #'
-#' @return List containing subsetted function and abundance dataframes as separate elements.
+#' @return list containing subsetted function and abundance data.frames as separate elements.
 #'
 #' @export
 subset_func_and_abun_tables <- function(func_table, abun_table, func_ids = NULL) {
