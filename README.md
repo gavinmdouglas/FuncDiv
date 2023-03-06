@@ -10,5 +10,5 @@ All feedback is appreciated! Please [open an issue](https://github.com/gavinmdou
 Please see our [wiki site](https://github.com/gavinmdouglas/FuncDiv/wiki) for the documentation.
 
 
-_Licensing note_: This repository contains modified code (specifically in `R/beta_workflow/R` and `src/rbiom_par_unifrac.cpp`) from version 1.0.3 of the `rbiom` R package ([link to original source code](https://CRAN.R-project.org/package=rbiom)). The original code and _FuncDiv_ are distributed under [GNU Affero General Public Licenses](https://www.gnu.org/licenses/agpl-3.0.en.html).
+_Licensing note_: This repository contains modified code (specifically in `R/beta_workflow.R` and `src/rbiom_par_unifrac.cpp`) from version 1.0.3 of the `rbiom` R package ([link to original source code](https://CRAN.R-project.org/package=rbiom)). The original code and _FuncDiv_ are distributed under [GNU Affero General Public Licenses](https://www.gnu.org/licenses/agpl-3.0.en.html).
 
