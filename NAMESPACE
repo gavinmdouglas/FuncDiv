@@ -1,5 +1,5 @@
 useDynLib(FuncDiv)
-exportPattern("ˆ[[:alpha:]]+")
+exportPattern("^[[:alpha:]]+")
 import(RcppParallel)
 import(RcppArmadillo)
 import(RcppXPtrUtils)
