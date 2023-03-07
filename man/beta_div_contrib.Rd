@@ -22,7 +22,7 @@ beta_div_contrib(
 )
 }
 \arguments{
-\item{metrics}{beta diversity metrics to compute. Must be default metric computed by \code{parallelDist::parDist} or one of \"weighted_unifrac\", \"unweighted_unifrac\", or \"jensen_shannon_div\".}
+\item{metrics}{beta diversity metrics to compute. Must be default metric computed by \code{parallelDist::parDist} or one of "weighted_unifrac", "unweighted_unifrac", or "jensen_shannon_div".}
 
 \item{func_tab}{data.frame object containing function copy numbers, with rows as functions and columns as taxa. Required if \code{abun_tab} is specified, and is mutually exclusive with \code{contrib_tab}.}
 
