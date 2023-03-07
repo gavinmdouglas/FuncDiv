@@ -86,7 +86,7 @@ compute_betadiv[["unweighted_unifrac"]] <- function(in_tab, in_phylo) {
 #' 
 #' The taxonomic abundances will be converted to relative abundances prior to computing inter-sample distances.
 #' 
-#' @param metrics beta diversity metrics to compute. Must be default metric computed by `parallelDist::parDist` or one of \"weighted_unifrac\", \"unweighted_unifrac\", or \"jensen_shannon_div\".
+#' @param metrics beta diversity metrics to compute. Must be default metric computed by `parallelDist::parDist` or one of "weighted_unifrac", "unweighted_unifrac", or "jensen_shannon_div".
 #' @param func_tab data.frame object containing function copy numbers, with rows as functions and columns as taxa. Required if `abun_tab` is specified, and is mutually exclusive with `contrib_tab`.
 #' @param abun_tab data.frame object containing taxonomic abundances across samples, with rows as taxa and columns as samples. Required if `func_tab` is specified, and is mutually exclusive with `contrib_tab`.
 #' @param contrib_tab data.frame object containing combined taxa abundances and function copy numbers across taxa. Must contain columns corresponding to the sample ids, function ids, taxa ids, and taxa 
