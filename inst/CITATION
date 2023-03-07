@@ -1,16 +1,16 @@
-citHeader("To cite FuncDiv in publications, please use:")
-
-citEntry(
-  entry    = "Article",
-  title    = "Efficient computation of contributional diversity metrics from microbiome data with FuncDiv",
-  author   = "Gavin M. Douglas, Sunu Kim, Morgan G. I. Langille, B. Jesse Shapiro",
-  journal  = "Bioinformatics",
-  year     = "2023",
-  volume   = "39",
-  number   = "1",
-  pages    = "btac809",
-  url      = "https://doi.org/10.1093/bioinformatics/btac809",
-  textVersion = paste(
-    "Gavin M. Douglas, Sunu Kim, Morgan G. I. Langille, B. Jesse Shapiro. 2023. Efficient computation of contributional diversity metrics from microbiome data with FuncDiv. Bioinformatics 39 (1): btac809. DOI: 10.1093/bioinformatics/btac809"
-  )
-)
+bibentry(bibtype = "Article",
+         title = "Efficient computation of contributional diversity metrics from microbiome data with FuncDiv",
+         author = c(person(given = c("Gavin", "M."),
+                           family = "Douglas"),
+                    person(given = "Sunu",
+                           family = "Kim"),
+                    person(given = c("Morgan", "G.", "I."),
+                           family = "Langille"),
+                    person(given = c("B.", "Jesse"),
+                           family = "Shapiro")),
+         year = "2023",
+         journal = "Bioinformatics",
+         volume = "39",
+         number = "1",
+         pages = "btac809",
+         url = "https://doi.org/10.1093/bioinformatics/btac809")
