@@ -43,35 +43,33 @@ ENS_pie <- function(x) {
   return(1 / sum(x ** 2, na.rm = TRUE))
 }
 
-fishers_alpha <- function(x) {
+fishers_alpha <- function(x, min_unique = 10) {
 
   # Simplified version of function implemented in vegan.
-  # Returns 0 if fit cannot be performed
+  # Returns NA if fit cannot be performed
   # (which is assumed to always be the case when there are
-  # fewer than three unique observations).
+  # fewer than 'min_unique' unique observations, which is 10 by default).
 
   x <- x[which(x > 0)]
 
-  if (length(x) < 3) { return(0) }
+  if (length(x) < min_unique) { return(NA) }
 
   unique_obs <- length(x)
   total_obs <- sum(x)
 
   func2scan <- function(x, unique_obs, total_obs) { x * log(1 + total_obs / x) - unique_obs }
 
-  options(warn = -1)
   uniroot_out <- try(stats::uniroot(func2scan,
                                     c(1, 50),
                                     extendInt = "upX",
                                     unique_obs = unique_obs, 
                                     total_obs = total_obs)$root,
                      silent = TRUE)
-  options(warn = 0)
 
   if (inherits(uniroot_out, "try-error")) {
-    return(0)
+    return(NA)
   } else {
-   return(uniroot_out)
+    return(uniroot_out)
   }
 }
 

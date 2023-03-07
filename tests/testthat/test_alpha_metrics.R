@@ -44,11 +44,11 @@ test_that("ENS_pie returns expected value, with missing data input", {
 })
 
 test_that("fishers_alpha returns expected value", {
-  expect_equal(compute_alpha_div(in_vec, "fishers_alpha"), 3.3050, tolerance = 1e-5)
+  expect_equal(compute_alpha_div(in_vec, "fishers_alpha", min_unique = 3), 3.3050, tolerance = 1e-5)
 })
 
 test_that("fishers_alpha returns expected value, with missing data input", {
-  expect_equal(compute_alpha_div(in_vec_complex, "fishers_alpha"), 1.743444, tolerance = 1e-7)
+  expect_equal(compute_alpha_div(in_vec_complex, "fishers_alpha", min_unique = 3), 1.743444, tolerance = 1e-7)
 })
 
 test_that("heips_evenness returns expected value", {
