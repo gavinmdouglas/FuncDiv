@@ -1,5 +1,7 @@
 testing/
 
+inst/WORDLIST
+
 # History files
 .Rhistory
 .Rapp.history
