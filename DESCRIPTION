@@ -12,17 +12,16 @@ Description: Compute alpha and beta contributional diversity metrics,
     <doi:10.1093/bioinformatics/btac809>.
 License: AGPL-3
 Depends:
-    R (>= 3.5.0),
-    Rcpp,
-    RcppArmadillo,
-    RcppParallel,
-    RcppXPtrUtils
+    R (>= 3.5.0)
 Imports:
     ape,
     collapse,
     data.table,
     parallel,
     parallelDist,
+    Rcpp,
+    RcppParallel,
+    RcppXPtrUtils,
     stats
 Suggests:
     testthat (>= 3.0.0)
