@@ -12,7 +12,7 @@ Description: Compute alpha and beta contributional diversity metrics,
     <doi:10.1093/bioinformatics/btac809>.
 License: AGPL-3
 Depends:
-    R (>= 2.10),
+    R (>= 3.5.0),
     Rcpp,
     RcppArmadillo,
     RcppParallel,
