@@ -1,6 +1,5 @@
 useDynLib(FuncDiv)
 import(RcppParallel)
-import(RcppArmadillo)
 import(RcppXPtrUtils)
 import(parallelDist)
 importFrom(Rcpp, evalCpp)
